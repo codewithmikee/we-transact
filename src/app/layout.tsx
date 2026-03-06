@@ -2,6 +2,7 @@ import { Inter, JetBrains_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { UserProvider } from "@/hooks/useUser";
 import { cn } from "@/lib/utils";
 
 const fontSans = Inter({
@@ -26,7 +27,9 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, fontSans.variable)}
     >
       <body className="font-sans">
-        <ThemeProvider>{children}</ThemeProvider>
+        <UserProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </UserProvider>
       </body>
     </html>
   )

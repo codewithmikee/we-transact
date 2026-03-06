@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { 
   CreditCard, 
   UserPlus, 
@@ -26,8 +27,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Spinner } from "@/components/ui/Spinner";
 
 // Extracted Layout & Page Components
-import { Navbar } from "@/components/layout/Navbar";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { SystemAdminLayout } from "@/components/layout/SystemAdminLayout";
 import { Footer } from "@/components/layout/Footer";
 import { ThemePalette } from "@/components/demo/ThemePalette";
 import { FormElements } from "@/components/demo/FormElements";
@@ -40,19 +40,59 @@ export default function Home() {
   const [activeTab, setActiveTab] = React.useState("account");
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 overflow-x-hidden">
-      <Navbar />
-
-      <div className="max-w-screen-2xl mx-auto flex flex-1 w-full min-w-0">
-        <Sidebar />
-
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+      <SystemAdminLayout>
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-10 space-y-12 md:space-y-16 max-w-5xl mx-auto min-w-0 w-full">
+        <div className="space-y-12 md:space-y-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            {/* Demo Navigation Section */}
+            <section id="demo-nav" className="mt-16 scroll-mt-24">
+              <header className="mb-8 border-b border-slate-200 pb-4">
+                <h2 className="text-2xl font-bold text-slate-900">Layout & Navigation Demos</h2>
+                <p className="text-slate-500 mt-1">Experience the different admin perspectives and responsive layouts.</p>
+              </header>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card className="border-indigo-100 bg-indigo-50/10 hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserPlus className="h-5 w-5 text-indigo-600" />
+                      System Admin Perspective
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-slate-600">
+                      View the system-wide dashboard, manage organizations, and navigate using the top navbar.
+                    </p>
+                    <Link href="/system">
+                      <Button variant="primary" className="w-full">Launch System Admin Demo</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-emerald-100 bg-emerald-50/10 hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-emerald-600" />
+                      Organization Admin Perspective
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-slate-600">
+                      Manage organization-specific features like integrations and payments with a dedicated sidebar.
+                    </p>
+                    <Link href="/org/acme-corp">
+                      <Button variant="primary" className="bg-emerald-600 hover:bg-emerald-700 w-full">Launch Org Admin Demo</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+
             {/* Typography Section */}
             <section id="typography" className="scroll-mt-24">
               <header className="mb-8 border-b border-slate-200 pb-4">
@@ -286,10 +326,9 @@ export default function Home() {
               </div>
             </section>
           </motion.div>
-        </main>
-      </div>
-
-      <Footer />
+        </div>
+        <Footer />
+      </SystemAdminLayout>
     </div>
   );
 }

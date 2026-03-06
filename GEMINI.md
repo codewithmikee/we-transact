@@ -15,7 +15,36 @@ This document provides essential context and instructions for AI agents working 
 - **Icons:** Lucide React
 - **Theming:** `next-themes` for dark/light mode support
 
-## Project Structure
+## Layouts & Navigation
+
+The project supports two primary administrative perspectives, each with its own layout and navigation pattern:
+
+### 1. System Admin Perspective (`/system/...`)
+- **Desktop:** Features a horizontal navigation bar in the header (`SYSTEM_ADMIN_NAV_ITEMS`).
+- **Mobile:** Navigation items are moved to a toggleable sidebar.
+- **Key Components:** `SystemAdminLayout`, `NotificationBell`, `ProfilePopover`.
+
+### 2. Organization Admin Perspective (`/org/[slug]/...`)
+- **Desktop:** Features a persistent left sidebar (`ORGANIZATION_USER_NAV_ITEMS`) and the Organization Name in the header.
+- **Mobile:** Sidebar is hidden by default and can be toggled via a hamburger menu.
+- **Nested View:** System admins can access an organization's perspective under `/system/organizations/[slug]/...`, which uses the `OrgAdminLayout` with a "Back to System" contextual link.
+- **Key Components:** `OrgAdminLayout`, `DynamicSidebar`.
+
+## Navigation Configuration
+
+Navigation is managed via `src/lib/nav-configs/nav-items.ts` and supports:
+- **Simple Links:** `NavItemContent` with title and link.
+- **Groups:** `NavGroup` with a title and an array of `NavItemContent`.
+- **Role-based Prevention:** `preventerUserRoles` can be used to hide items from specific roles (logic implemented in sidebar/navbar).
+
+## Core UI Components (Headless UI)
+- **Tabs:** `src/components/ui/Tabs.tsx`
+- **Toggle/Switch:** `src/components/ui/Toggle.tsx`
+- **Menu/Dropdown:** `src/components/ui/Menu.tsx`
+- **Modal/Dialog:** `src/components/ui/Dialog.tsx`
+- **Select/Listbox:** `src/components/ui/Select.tsx`
+- **NotificationBell:** `src/components/layout/NotificationBell.tsx` (Popover)
+- **ProfilePopover:** `src/components/layout/ProfilePopover.tsx` (Menu)
 
 - `src/app/`: Application routes, layouts, and global styles.
 - `src/components/`:
