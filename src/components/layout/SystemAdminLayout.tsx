@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { 
-  Menu, 
+import {
+  Menu,
   X,
-  LayoutDashboard, 
+  LayoutDashboard,
   Building2,
   Users,
   Banknote
@@ -61,8 +61,8 @@ export function SystemAdminLayout({ children }: { children: React.ReactNode }) {
 
         <div className="flex items-center gap-2 md:gap-4">
           <NotificationBell />
-          <ProfilePopover role="System Admin" />
-          <button 
+          <ProfilePopover />
+          <button
             className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-md"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
@@ -72,14 +72,14 @@ export function SystemAdminLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       <div className="flex flex-1 max-w-screen-2xl mx-auto w-full">
-        {/* Sidebar only for mobile/tablet in System Admin view, as desktop has nav in header */}
-        <DynamicSidebar 
-          items={SYSTEM_ADMIN_NAV_ITEMS} 
-          className="lg:hidden" 
+        {/* Sidebar only for mobile/tablet — desktop uses the top nav */}
+        <DynamicSidebar
+          items={SYSTEM_ADMIN_NAV_ITEMS}
+          className="lg:hidden"
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
-        
+
         <main className="flex-1 p-4 md:p-8 lg:p-12 min-w-0 max-w-6xl mx-auto w-full">
           {children}
         </main>

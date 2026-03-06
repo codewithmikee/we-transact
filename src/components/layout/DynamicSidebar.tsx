@@ -5,12 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavConfig, NavGroup, NavItemContent } from "@/types/nav.types";
 import { cn } from "@/lib/utils";
-import { 
+import { useSessionStore, selectUserRole } from "@/stores/session.store";
+import {
   ChevronDown,
-  LayoutDashboard, 
-  Link as LinkIcon, 
-  Users, 
-  Settings, 
+  LayoutDashboard,
+  Link as LinkIcon,
+  Users,
+  Settings,
   UserCog,
   Building2,
   Banknote,
@@ -41,11 +42,16 @@ function isNavGroup(item: NavConfig): item is NavGroup {
 
 export function DynamicSidebar({ items, className, isOpen, onClose }: DynamicSidebarProps) {
   const pathname = usePathname();
+  const role = useSessionStore(selectUserRole);
+
+  /** Returns true if this nav item should be shown for the current role */
+  const isVisible = (item: NavItemContent) =>
+    !item.preventerUserRoles || !role || !item.preventerUserRoles.includes(role);
 
   const renderItem = (item: NavItemContent, isSubItem = false) => {
     const isActive = pathname === item.link || pathname.startsWith(item.link + "/");
     const Icon = item.icon ? IconMap[item.icon] : null;
-    
+
     return (
       <Link
         key={item.link}
@@ -54,8 +60,8 @@ export function DynamicSidebar({ items, className, isOpen, onClose }: DynamicSid
         className={cn(
           "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
           isSubItem ? "ml-4" : "",
-          isActive 
-            ? "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" 
+          isActive
+            ? "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200"
             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
         )}
       >
@@ -66,13 +72,15 @@ export function DynamicSidebar({ items, className, isOpen, onClose }: DynamicSid
   };
 
   const renderGroup = (group: NavGroup) => {
+    const visibleItems = group.items.filter(isVisible);
+    if (visibleItems.length === 0) return null;
     return (
       <div key={group.title} className="space-y-1">
         <h5 className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
           {group.title}
         </h5>
         <div className="flex flex-col gap-1">
-          {group.items.map(item => renderItem(item, true))}
+          {visibleItems.map(item => renderItem(item, true))}
         </div>
       </div>
     );
@@ -82,7 +90,7 @@ export function DynamicSidebar({ items, className, isOpen, onClose }: DynamicSid
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
           onClick={onClose}
         />
@@ -101,11 +109,13 @@ export function DynamicSidebar({ items, className, isOpen, onClose }: DynamicSid
         </div>
 
         <nav className="space-y-8">
-          {items.map((item, index) => (
-            <React.Fragment key={index}>
-              {isNavGroup(item) ? renderGroup(item) : renderItem(item)}
-            </React.Fragment>
-          ))}
+          {items.map((item, index) => {
+            if (isNavGroup(item)) {
+              return <React.Fragment key={index}>{renderGroup(item)}</React.Fragment>;
+            }
+            if (!isVisible(item)) return null;
+            return <React.Fragment key={index}>{renderItem(item)}</React.Fragment>;
+          })}
         </nav>
       </aside>
     </>
