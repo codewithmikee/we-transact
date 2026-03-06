@@ -12,7 +12,12 @@ import { Modal } from "@/components/ui/Dialog";
 import { DropdownMenu, DropdownMenuItem } from "@/components/ui/Menu";
 import { Select } from "@/components/ui/Select";
 
-const selectOptions = [
+interface SelectOption {
+  id: string | number;
+  name: string;
+}
+
+const selectOptions: SelectOption[] = [
   { id: 1, name: "Wade Cooper" },
   { id: 2, name: "Arlene Mccoy" },
   { id: 3, name: "Devon Webb" },
@@ -24,7 +29,7 @@ const selectOptions = [
 export default function DemoPage() {
   const [isToggled, setIsToggled] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [selectedPerson, setSelectedPerson] = React.useState(selectOptions[0]);
+  const [selectedPerson, setSelectedPerson] = React.useState<SelectOption>(selectOptions[0]);
 
   return (
     <div className="p-8 space-y-12 max-w-4xl mx-auto pb-24">

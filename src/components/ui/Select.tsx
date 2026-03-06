@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from "@headlessui/react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronUpDownIcon } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 
 interface SelectOption {
   id: string | number;
@@ -37,7 +37,7 @@ export function Select({
           <ListboxButton className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
             <span className="block truncate">{value.name}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-              <ChevronUpDownIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
+              <ChevronsUpDown className="h-5 w-5 text-slate-400" aria-hidden="true" />
             </span>
           </ListboxButton>
 

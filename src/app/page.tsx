@@ -164,11 +164,14 @@ export default function Home() {
 
                   <div>
                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Tabs</h4>
-                    <Tabs>
+                    <Tabs 
+                      selectedIndex={["account", "preferences", "notifications"].indexOf(activeTab)} 
+                      onChange={(index) => setActiveTab(["account", "preferences", "notifications"][index])}
+                    >
                       <TabsList>
-                        <TabsTrigger isActive={activeTab === "account"} onClick={() => setActiveTab("account")}>Account</TabsTrigger>
-                        <TabsTrigger isActive={activeTab === "preferences"} onClick={() => setActiveTab("preferences")}>Preferences</TabsTrigger>
-                        <TabsTrigger isActive={activeTab === "notifications"} onClick={() => setActiveTab("notifications")}>Notifications</TabsTrigger>
+                        <TabsTrigger>Account</TabsTrigger>
+                        <TabsTrigger>Preferences</TabsTrigger>
+                        <TabsTrigger>Notifications</TabsTrigger>
                       </TabsList>
                     </Tabs>
                   </div>
