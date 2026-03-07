@@ -16,6 +16,7 @@ interface SelectProps {
   onChange: (value: SelectOption) => void;
   options: SelectOption[];
   className?: string;
+  disabled?: boolean;
 }
 
 export function Select({ 
@@ -23,7 +24,8 @@ export function Select({
   value, 
   onChange, 
   options, 
-  className 
+  className,
+  disabled = false,
 }: SelectProps) {
   return (
     <div className={cn("w-full", className)}>
@@ -32,9 +34,15 @@ export function Select({
           {label}
         </label>
       )}
-      <Listbox value={value} onChange={onChange}>
+      <Listbox value={value} onChange={onChange} disabled={disabled}>
         <div className="relative">
-          <ListboxButton className="relative w-full cursor-default rounded-md bg-background py-2 pl-3 pr-10 text-left text-foreground shadow-sm ring-1 ring-inset ring-input focus:outline-none focus:ring-2 focus:ring-ring sm:text-sm sm:leading-6">
+          <ListboxButton
+            className={cn(
+              "relative w-full rounded-md bg-background py-2 pl-3 pr-10 text-left text-foreground shadow-sm ring-1 ring-inset ring-input focus:outline-none focus:ring-2 focus:ring-ring sm:text-sm sm:leading-6",
+              disabled && "cursor-not-allowed opacity-50",
+              !disabled && "cursor-default",
+            )}
+          >
             <span className="block truncate">{value.name}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronsUpDown className="h-5 w-5 text-muted-foreground" aria-hidden="true" />

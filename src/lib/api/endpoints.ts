@@ -27,6 +27,26 @@ export const PAYMENT_ENDPOINTS = {
   AGENTS: "/payment/agents",
   AGENT: (uuid: string) => `/payment/agents/${uuid}`,
   AGENT_CONNECT_CODE: (uuid: string) => `/payment/agents/${uuid}/connect-code`,
+  AGENT_RESET_PASSWORD: (uuid: string) => `/payment/agents/${uuid}/reset-password`,
   ACCOUNTS: "/payment/accounts",
   ACCOUNT: (uuid: string) => `/payment/accounts/${uuid}`,
+} as const;
+
+export const PLATFORM_ENDPOINTS = {
+  BANKS: "/platform/banks",
+  ACCOUNTS: "/platform/accounts",
+  DEPOSITS: "/platform/transactions/deposits",
+  WITHDRAWS: "/platform/transactions/withdraws",
+} as const;
+
+export const TRANSACTION_ENDPOINTS = {
+  LIST: "/transactions",
+  MANUAL: "/transactions/manual",
+  BY_TRACKING: (code: string) => `/transactions/tracking/${code}`,
+  DETAIL: (uuid: string) => `/transactions/${uuid}`,
+  EVENTS: (uuid: string) => `/transactions/${uuid}/events`,
+  ASSIGN: (uuid: string) => `/transactions/${uuid}/assign`,
+  REASSIGN: (uuid: string) => `/transactions/${uuid}/reassign`,
+  REJECT: (uuid: string) => `/transactions/${uuid}/reject`,
+  COMPLETE: (uuid: string) => `/transactions/${uuid}/complete`,
 } as const;

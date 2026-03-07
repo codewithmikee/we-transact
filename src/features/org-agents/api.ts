@@ -5,6 +5,7 @@ export {
   useUpdatePaymentAgent,
   useDeletePaymentAgent,
   useGenerateConnectCode,
+  useResetAgentPassword,
   useAgentAccounts,
   useCreateAgentAccount,
   useUpdateAgentAccount,

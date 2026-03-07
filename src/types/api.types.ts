@@ -248,7 +248,14 @@ export interface StoreAgentInput {
   type: AgentType;
   phone_number?: string;
   user_name?: string;
+  password?: string;
+  password_confirmation?: string;
   device_name?: string;
+}
+
+export interface ResetAgentPasswordInput {
+  password: string;
+  password_confirmation: string;
 }
 
 export interface UpdateAgentInput {
@@ -305,4 +312,172 @@ export interface UpdateBankInput {
   name?: string;
   code?: string;
   is_available?: boolean;
+}
+
+// ── Transaction Module (Phase 2) ──────────────────────────────────────────────
+
+export type TransactionType = "deposit" | "withdraw";
+
+export type TransactionStatus =
+  | "pending"
+  | "assigned"
+  | "processing"
+  | "awaiting_confirmation"
+  | "completed"
+  | "rejected"
+  | "cancelled";
+
+export type TransactionSource = "dashboard" | "platform";
+
+export type TransactionEventType =
+  | "created"
+  | "started"
+  | "assigned"
+  | "platform_confirmed"
+  | "agent_confirmed"
+  | "completed"
+  | "rejected"
+  | "cancelled"
+  | "manual_reassign";
+
+export type TransactionEventActorType = "platform" | "agent" | "admin" | "system";
+
+export interface TransactionResource {
+  id: UUID;
+  tracking_code: string;
+  type: TransactionType;
+  status: TransactionStatus;
+  source: TransactionSource;
+  currency: string;
+  /** Decimal value returned as a string, e.g. "500.00" */
+  amount: string;
+  client_request_id: string | null;
+  client_reference: string | null;
+  external_reference: string | null;
+  client_full_name: string;
+  client_phone_number: string | null;
+  client_account_holder_name: string | null;
+  client_account_number: string | null;
+  rejection_reason: string | null;
+  client: { id: UUID; full_name: string; phone_number: string | null } | null;
+  client_account: {
+    id: UUID;
+    account_holder_name: string;
+    account_number: string;
+    account_alias: string | null;
+  } | null;
+  bank: { id: UUID; name: string; code: string } | null;
+  agent: { id: UUID; name: string; slug: string } | null;
+  agent_account: { id: UUID; holder_name: string; account_number: string } | null;
+  created_by: { id: UUID; name: string; user_name: string } | null;
+  requested_at: ISODateString | null;
+  assigned_at: ISODateString | null;
+  completed_at: ISODateString | null;
+  rejected_at: ISODateString | null;
+  cancelled_at: ISODateString | null;
+  created_at: ISODateString;
+  updated_at: ISODateString;
+}
+
+export interface TransactionEventResource {
+  id: UUID;
+  event_type: TransactionEventType;
+  actor_type: TransactionEventActorType;
+  actor_id: UUID | null;
+  notes: string | null;
+  payload: Record<string, unknown> | null;
+  created_at: ISODateString;
+  updated_at: ISODateString;
+}
+
+export interface TransactionListQuery extends PaginationQuery {
+  type?: TransactionType;
+  status?: TransactionStatus;
+  statuses?: TransactionStatus[];
+  source?: TransactionSource;
+  tracking_code?: string;
+  client_id?: string;
+  client_name?: string;
+  client_phone_number?: string;
+  bank_id?: string;
+  agent_id?: string;
+}
+
+export interface ManualTransactionInput {
+  type: TransactionType;
+  currency?: string;
+  amount: number;
+  bank_id: string;
+  agent_account_id?: string;
+  client_request_id?: string;
+  client_reference?: string;
+  external_reference?: string;
+  metadata?: Record<string, unknown>;
+  client?: {
+    id?: string;
+    full_name?: string;
+    phone_number?: string;
+    external_client_id?: string;
+    metadata?: Record<string, unknown>;
+  };
+  client_account?: {
+    id?: string;
+    account_holder_name?: string;
+    account_number?: string;
+    account_alias?: string;
+  };
+}
+
+export interface AssignTransactionInput {
+  agent_account_id: string;
+  notes?: string;
+}
+
+export interface ReassignTransactionInput {
+  agent_account_id: string;
+  notes?: string;
+}
+
+export interface RejectTransactionInput {
+  rejection_reason: string;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CompleteTransactionInput {
+  external_reference?: string;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// ── Platform Transaction Inputs (X-API-KEY auth) ──────────────────────────────
+
+interface PlatformClientInput {
+  full_name: string;
+  phone_number?: string;
+  external_client_id?: string;
+}
+
+export interface PlatformDepositInput {
+  amount: number;
+  bank_id: string;
+  agent_account_id: string;
+  client_request_id: string;
+  client_reference?: string;
+  external_reference?: string;
+  client: PlatformClientInput;
+}
+
+export interface PlatformWithdrawInput {
+  amount: number;
+  bank_id: string;
+  client_request_id: string;
+  client_reference?: string;
+  external_reference?: string;
+  client: PlatformClientInput;
+  client_account: {
+    account_holder_name: string;
+    account_number: string;
+    account_alias?: string;
+  };
 }

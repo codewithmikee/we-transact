@@ -7,6 +7,11 @@ export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
         icon: 'LayoutDashboard',
     },
     {
+        link: '/org/transactions',
+        title: "Transactions",
+        icon: 'ArrowLeftRight',
+    },
+    {
         link: '/org/integrations',
         title: "Integrations",
         icon: 'LinkIcon',

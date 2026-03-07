@@ -9,6 +9,7 @@ import {
   ApiSuccessResponse,
   PaymentAgentResource,
   PaginationQuery,
+  ResetAgentPasswordInput,
   StoreAgentAccountInput,
   StoreAgentInput,
   UpdateAgentAccountInput,
@@ -33,12 +34,8 @@ export function usePaymentAgent(uuid: string, enabled = true) {
     queryKey: ["payment-agent", uuid],
     queryFn: () =>
       apiClient
-        .get<ApiSuccessResponse<{ agent: PaymentAgentResource }>>(PAYMENT_ENDPOINTS.AGENT(uuid))
-        .then((r) => {
-          const agent = r.data.data.agent;
-          if (!agent) throw new Error("Agent data missing from response");
-          return agent;
-        }),
+        .get<ApiSuccessResponse<PaymentAgentResource>>(PAYMENT_ENDPOINTS.AGENT(uuid))
+        .then((r) => r.data.data),
     enabled,
   });
 }
@@ -48,8 +45,8 @@ export function useCreatePaymentAgent() {
   return useMutation({
     mutationFn: (data: StoreAgentInput) =>
       apiClient
-        .post<ApiSuccessResponse<{ agent: PaymentAgentResource }>>(PAYMENT_ENDPOINTS.AGENTS, data)
-        .then((r) => r.data.data.agent),
+        .post<ApiSuccessResponse<PaymentAgentResource>>(PAYMENT_ENDPOINTS.AGENTS, data)
+        .then((r) => r.data.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["payment-agents"] });
       toast.success("Agent created");
@@ -63,11 +60,11 @@ export function useUpdatePaymentAgent() {
   return useMutation({
     mutationFn: ({ uuid, data }: { uuid: string; data: UpdateAgentInput }) =>
       apiClient
-        .patch<ApiSuccessResponse<{ agent: PaymentAgentResource }>>(
+        .patch<ApiSuccessResponse<PaymentAgentResource>>(
           PAYMENT_ENDPOINTS.AGENT(uuid),
           data,
         )
-        .then((r) => r.data.data.agent),
+        .then((r) => r.data.data),
     onSuccess: (agent) => {
       qc.setQueryData(["payment-agent", agent.id], agent);
       qc.invalidateQueries({ queryKey: ["payment-agents"] });
@@ -94,13 +91,41 @@ export function useGenerateConnectCode() {
   return useMutation({
     mutationFn: (uuid: string) =>
       apiClient
-        .post<ApiSuccessResponse<{ agent: PaymentAgentResource }>>(
+        .post<
+          ApiSuccessResponse<{
+            agent_id: string;
+            connect_code: string;
+            connect_code_expires_at: string;
+          }>
+        >(
           PAYMENT_ENDPOINTS.AGENT_CONNECT_CODE(uuid),
         )
-        .then((r) => r.data.data.agent),
-    onSuccess: (agent) => {
-      qc.setQueryData(["payment-agent", agent.id], agent);
+        .then((r) => r.data.data),
+    onSuccess: (_, uuid) => {
       qc.invalidateQueries({ queryKey: ["payment-agents"] });
+      qc.invalidateQueries({ queryKey: ["payment-agent", uuid] });
+    },
+    onError: toastApiError,
+  });
+}
+
+export function useResetAgentPassword() {
+  return useMutation({
+    mutationFn: ({
+      uuid,
+      data,
+    }: {
+      uuid: string;
+      data: ResetAgentPasswordInput;
+    }) =>
+      apiClient
+        .post<ApiSuccessResponse<PaymentAgentResource>>(
+          PAYMENT_ENDPOINTS.AGENT_RESET_PASSWORD(uuid),
+          data,
+        )
+        .then((r) => r.data.data),
+    onSuccess: () => {
+      toast.success("Agent password reset");
     },
     onError: toastApiError,
   });
@@ -132,11 +157,11 @@ export function useCreateAgentAccount() {
       data: StoreAgentAccountInput;
     }) =>
       apiClient
-        .post<ApiSuccessResponse<{ account: AgentAccountResource }>>(
+        .post<ApiSuccessResponse<AgentAccountResource>>(
           `${PAYMENT_ENDPOINTS.AGENT(agentUuid)}/accounts`,
           data,
         )
-        .then((r) => r.data.data.account),
+        .then((r) => r.data.data),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ["agent-accounts", variables.agentUuid] });
       qc.invalidateQueries({ queryKey: ["payment-agent", variables.agentUuid] });
@@ -159,11 +184,11 @@ export function useUpdateAgentAccount() {
       data: UpdateAgentAccountInput;
     }) =>
       apiClient
-        .patch<ApiSuccessResponse<{ account: AgentAccountResource }>>(
+        .patch<ApiSuccessResponse<AgentAccountResource>>(
           `${PAYMENT_ENDPOINTS.AGENT(agentUuid)}/accounts/${accountUuid}`,
           data,
         )
-        .then((r) => r.data.data.account),
+        .then((r) => r.data.data),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ["agent-accounts", variables.agentUuid] });
       toast.success("Account updated");

@@ -267,8 +267,12 @@ export default function AgentDetailPage() {
 
   const handleGenerateConnectCode = async () => {
     if (!agent) return;
-    const updated = await connectCodeMutation.mutateAsync(agent.id);
-    setConnectCodeAgent(updated);
+    const connectCodePayload = await connectCodeMutation.mutateAsync(agent.id);
+    setConnectCodeAgent({
+      ...agent,
+      connect_code: connectCodePayload.connect_code,
+      connect_code_expires_at: connectCodePayload.connect_code_expires_at,
+    });
   };
 
   if (isPending) {

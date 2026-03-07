@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Users, Key, CreditCard, UserCog } from "lucide-react";
+import { Users, Key, CreditCard, UserCog, ArrowLeftRight } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatusBadge } from "@/components/data/StatusBadge";
-import { useApiKeys, useOrg, useOrgAdmins, usePaymentAgents } from "./api";
+import { useApiKeys, useOrg, useOrgAdmins, usePaymentAgents, useTransactions } from "./api";
 
 function StatCard({
   title,
@@ -49,6 +49,7 @@ export default function OrgDashboardPage() {
   const { data: admins, isLoading: adminsLoading } = useOrgAdmins({ per_page: 1 });
   const { data: agents, isLoading: agentsLoading } = usePaymentAgents({ per_page: 1 });
   const { data: keys, isLoading: keysLoading } = useApiKeys({ per_page: 1 });
+  const { data: transactions, isLoading: txLoading } = useTransactions({ per_page: 1 });
 
   return (
     <>
@@ -59,7 +60,7 @@ export default function OrgDashboardPage() {
       />
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <StatCard
           title="Admins"
           value={admins?.meta.total}
@@ -87,6 +88,13 @@ export default function OrgDashboardPage() {
           icon={CreditCard}
           href="/org/payment-setting"
           isLoading={false}
+        />
+        <StatCard
+          title="Transactions"
+          value={transactions?.meta.total}
+          icon={ArrowLeftRight}
+          href="/org/transactions"
+          isLoading={txLoading}
         />
       </div>
 

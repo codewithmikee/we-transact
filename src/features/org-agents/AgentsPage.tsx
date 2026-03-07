@@ -6,6 +6,7 @@ import {
   Plus,
   Trash2,
   RefreshCw,
+  KeyRound,
   ToggleLeft,
   ToggleRight,
 } from "lucide-react";
@@ -26,11 +27,13 @@ import { PaginationBar } from "@/components/data/PaginationBar";
 import { StatusBadge, AvailabilityBadge } from "@/components/data/StatusBadge";
 import { CopyField } from "@/components/data/CopyButton";
 import { PaymentAgentResource } from "@/types/api.types";
+import { selectUserRole, useSessionStore } from "@/stores/session.store";
 import {
   useCreatePaymentAgent,
   useDeletePaymentAgent,
   useGenerateConnectCode,
   usePaymentAgents,
+  useResetAgentPassword,
   useUpdatePaymentAgent,
 } from "./api";
 
@@ -47,6 +50,8 @@ const createAgentSchema = z
     type: z.enum(["user", "device"]),
     phone_number: z.string().optional(),
     user_name: z.string().optional(),
+    password: z.string().optional(),
+    password_confirmation: z.string().optional(),
     device_name: z.string().optional(),
   })
   .refine(
@@ -55,9 +60,35 @@ const createAgentSchema = z
       return true;
     },
     { message: "Username is required for user agents", path: ["user_name"] },
+  )
+  .refine(
+    (d) => {
+      if (d.type === "user") return !!d.password && d.password.length >= 8;
+      return true;
+    },
+    { message: "Password must be at least 8 characters", path: ["password"] },
+  )
+  .refine(
+    (d) => {
+      if (d.type === "user") return d.password === d.password_confirmation;
+      return true;
+    },
+    { message: "Passwords do not match", path: ["password_confirmation"] },
   );
 
 type CreateAgentForm = z.infer<typeof createAgentSchema>;
+
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    password_confirmation: z.string().min(8, "Password confirmation is required"),
+  })
+  .refine((d) => d.password === d.password_confirmation, {
+    message: "Passwords do not match",
+    path: ["password_confirmation"],
+  });
+
+type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
@@ -68,17 +99,17 @@ export default function AgentsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PaymentAgentResource | null>(null);
   const [toggleTarget, setToggleTarget] = useState<PaymentAgentResource | null>(null);
+  const [passwordResetTarget, setPasswordResetTarget] = useState<PaymentAgentResource | null>(null);
   const [connectCodeAgent, setConnectCodeAgent] = useState<PaymentAgentResource | null>(null);
-  const [createdAgentSecret, setCreatedAgentSecret] = useState<{
-    agent: PaymentAgentResource;
-    password?: string;
-  } | null>(null);
 
   const { data, isLoading, isError, refetch } = usePaymentAgents({ page, per_page: 15, search });
   const createMutation = useCreatePaymentAgent();
   const updateMutation = useUpdatePaymentAgent();
   const deleteMutation = useDeletePaymentAgent();
   const connectCodeMutation = useGenerateConnectCode();
+  const resetPasswordMutation = useResetAgentPassword();
+  const userRole = useSessionStore(selectUserRole);
+  const canResetPasswords = userRole === "sy_super_admin" || userRole === "org_super_admin";
  
 
   const [agentType, setAgentType] = useState<{ id: string; name: string }>(agentTypeOptions[0]);
@@ -94,13 +125,20 @@ export default function AgentsPage() {
     defaultValues: { type: "user" },
   });
 
+  const {
+    register: registerResetPassword,
+    handleSubmit: handleResetPasswordSubmit,
+    reset: resetResetPasswordForm,
+    formState: { errors: resetPasswordErrors },
+  } = useForm<ResetPasswordForm>({
+    resolver: zodResolver(resetPasswordSchema),
+  });
+
   const handleCreate = handleSubmit(async (values) => {
-    const agent = await createMutation.mutateAsync(values);
+    await createMutation.mutateAsync(values);
     setShowCreate(false);
     reset();
-    if (agent.agent_user_temporary_password) {
-      setCreatedAgentSecret({ agent, password: agent.agent_user_temporary_password });
-    }
+    setAgentType(agentTypeOptions[0]);
   });
 
   const handleDelete = async () => {
@@ -119,9 +157,23 @@ export default function AgentsPage() {
   };
 
   const handleGenerateConnectCode = async (agent: PaymentAgentResource) => {
-    const updated = await connectCodeMutation.mutateAsync(agent.id);
-    setConnectCodeAgent(updated);
+    const connectCodePayload = await connectCodeMutation.mutateAsync(agent.id);
+    setConnectCodeAgent({
+      ...agent,
+      connect_code: connectCodePayload.connect_code,
+      connect_code_expires_at: connectCodePayload.connect_code_expires_at,
+    });
   };
+
+  const handleResetPassword = handleResetPasswordSubmit(async (values) => {
+    if (!passwordResetTarget) return;
+    await resetPasswordMutation.mutateAsync({
+      uuid: passwordResetTarget.id,
+      data: values,
+    });
+    setPasswordResetTarget(null);
+    resetResetPasswordForm();
+  });
 
   const columns: Column<PaymentAgentResource>[] = [
     {
@@ -176,6 +228,15 @@ export default function AgentsPage() {
                     icon: RefreshCw,
                     onClick: () => handleGenerateConnectCode(row),
                     disabled: connectCodeMutation.isPending,
+                  },
+                ]
+              : []),
+            ...(row.type === "user" && canResetPasswords
+              ? [
+                  {
+                    label: "Reset Password",
+                    icon: KeyRound,
+                    onClick: () => setPasswordResetTarget(row),
                   },
                 ]
               : []),
@@ -270,12 +331,27 @@ export default function AgentsPage() {
               <Input
                 label="Username"
                 error={errors.user_name?.message}
+                autoComplete="username"
                 {...register("user_name")}
               />
               <Input
                 label="Phone Number (optional)"
                 type="tel"
                 {...register("phone_number")}
+              />
+              <Input
+                label="Password"
+                type="password"
+                autoComplete="new-password"
+                error={errors.password?.message}
+                {...register("password")}
+              />
+              <Input
+                label="Confirm Password"
+                type="password"
+                autoComplete="new-password"
+                error={errors.password_confirmation?.message}
+                {...register("password_confirmation")}
               />
             </>
           )}
@@ -304,31 +380,6 @@ export default function AgentsPage() {
         </form>
       </AppDialog>
 
-      {/* Show temporary password after creating user agent */}
-      <AppDialog
-        open={!!createdAgentSecret}
-        onClose={() => setCreatedAgentSecret(null)}
-        title="Agent Created"
-        maxWidth="sm"
-      >
-        <div className="space-y-4">
-          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm text-amber-600 dark:text-amber-400">
-            Copy the temporary password now — it will not be shown again.
-          </div>
-          {createdAgentSecret?.password && (
-            <CopyField value={createdAgentSecret.password} label="Temporary Password" />
-          )}
-          <p className="text-xs text-muted-foreground">
-            Username: <span className="font-mono font-medium">{createdAgentSecret?.agent.agent_user?.user_name}</span>
-          </p>
-          <div className="flex justify-end">
-            <Button variant="primary" onClick={() => setCreatedAgentSecret(null)}>
-              Done
-            </Button>
-          </div>
-        </div>
-      </AppDialog>
-
       {/* Connect Code Modal */}
       <AppDialog
         open={!!connectCodeAgent}
@@ -354,6 +405,46 @@ export default function AgentsPage() {
             </Button>
           </div>
         </div>
+      </AppDialog>
+
+      <AppDialog
+        open={!!passwordResetTarget}
+        onClose={() => { setPasswordResetTarget(null); resetResetPasswordForm(); }}
+        title="Reset Agent Password"
+        maxWidth="sm"
+      >
+        <form onSubmit={handleResetPassword} className="space-y-4">
+          <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-blue-600 dark:text-blue-400">
+            Set a new password for <span className="font-medium">{passwordResetTarget?.name}</span>.
+          </div>
+          <Input
+            label="New Password"
+            type="password"
+            autoComplete="new-password"
+            error={resetPasswordErrors.password?.message}
+            {...registerResetPassword("password")}
+          />
+          <Input
+            label="Confirm Password"
+            type="password"
+            autoComplete="new-password"
+            error={resetPasswordErrors.password_confirmation?.message}
+            {...registerResetPassword("password_confirmation")}
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { setPasswordResetTarget(null); resetResetPasswordForm(); }}
+              disabled={resetPasswordMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={resetPasswordMutation.isPending}>
+              {resetPasswordMutation.isPending ? "Resetting…" : "Reset Password"}
+            </Button>
+          </div>
+        </form>
       </AppDialog>
 
       {/* Toggle Status Confirm */}

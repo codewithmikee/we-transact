@@ -194,12 +194,12 @@ function ProfileMenu({
   return (
     <HeadlessMenu as="div" className="relative">
       <MenuButton className="flex items-center gap-3 rounded-full border border-border bg-background px-2.5 py-2 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <div className="hidden min-w-0 md:block">
+        {/* <div className="hidden min-w-0 md:block">
           <p className="truncate text-sm font-semibold text-foreground">
             {user?.name ?? "Unknown user"}
           </p>
           <p className="truncate text-xs text-muted-foreground">{roleLabel}</p>
-        </div>
+        </div> */}
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
           {initials}
         </div>
