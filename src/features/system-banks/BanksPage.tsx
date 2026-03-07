@@ -89,8 +89,8 @@ export default function BanksPage() {
       header: "Bank",
       cell: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.name}</p>
-          <p className="font-mono text-xs text-slate-400">{row.code}</p>
+          <p className="font-medium text-foreground">{row.name}</p>
+          <p className="font-mono text-xs text-muted-foreground">{row.code}</p>
         </div>
       ),
     },
@@ -241,7 +241,7 @@ export default function BanksPage() {
           />
           <div className="flex items-center justify-between py-1">
             <div>
-              <p className="text-sm font-medium text-slate-700">Available for orgs</p>
+              <p className="text-sm font-medium text-foreground/80">Available for orgs</p>
             </div>
             <Toggle
               checked={editAvailable ?? true}

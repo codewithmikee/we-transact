@@ -7,19 +7,19 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function Badge({ className, variant = "default", ...props }: BadgeProps) {
   const variants = {
-    default: "border-transparent bg-slate-900 text-slate-50 hover:bg-slate-900/80",
-    secondary: "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-100/80",
-    destructive: "border-transparent bg-red-500 text-slate-50 hover:bg-red-500/80",
-    outline: "text-slate-950 border border-slate-200",
-    success: "border-transparent bg-green-100 text-green-800 hover:bg-green-100/80",
-    info: "border-transparent bg-indigo-100 text-indigo-800 hover:bg-indigo-100/80",
-    warning: "border-transparent bg-amber-100 text-amber-800 hover:bg-amber-100/80",
+    default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+    secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+    destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+    outline: "text-foreground border-border",
+    success: "border-transparent bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    info: "border-transparent bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    warning: "border-transparent bg-amber-500/10 text-amber-600 dark:text-amber-400",
   };
 
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2",
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
         variants[variant],
         className
       )}

@@ -89,8 +89,8 @@ export default function IntegrationsPage() {
       header: "Name",
       cell: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.name}</p>
-          <p className="font-mono text-xs text-slate-400">{row.key_id}</p>
+          <p className="font-medium text-foreground">{row.name}</p>
+          <p className="font-mono text-xs text-muted-foreground">{row.key_id}</p>
         </div>
       ),
     },
@@ -106,7 +106,7 @@ export default function IntegrationsPage() {
         row.expires_at ? (
           new Date(row.expires_at).toLocaleDateString()
         ) : (
-          <span className="text-slate-400">Never</span>
+          <span className="text-muted-foreground">Never</span>
         ),
     },
     {
@@ -116,7 +116,7 @@ export default function IntegrationsPage() {
         row.last_used_at ? (
           new Date(row.last_used_at).toLocaleDateString()
         ) : (
-          <span className="text-slate-400">Never</span>
+          <span className="text-muted-foreground">Never</span>
         ),
     },
     {
@@ -232,7 +232,7 @@ export default function IntegrationsPage() {
         maxWidth="sm"
       >
         <div className="space-y-4">
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm text-amber-600 dark:text-amber-400">
             Copy this key now — it will not be shown again.
           </div>
           {createdKey?.plain_key && (

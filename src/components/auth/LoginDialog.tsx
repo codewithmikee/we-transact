@@ -116,7 +116,7 @@ export function LoginDialog({
         <div className="space-y-1.5">
           <label
             htmlFor="user_name"
-            className="block text-sm font-medium text-slate-700"
+            className="block text-sm font-medium text-foreground/80"
           >
             Username
           </label>
@@ -143,7 +143,7 @@ export function LoginDialog({
         <div className="space-y-1.5">
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-slate-700"
+            className="block text-sm font-medium text-foreground/80"
           >
             Password
           </label>
@@ -168,7 +168,7 @@ export function LoginDialog({
               type="button"
               tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />

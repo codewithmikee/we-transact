@@ -86,8 +86,8 @@ export default function OrganizationsPage() {
       header: "Organization",
       cell: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.name}</p>
-          <p className="font-mono text-xs text-slate-400">{row.slug}</p>
+          <p className="font-medium text-foreground">{row.name}</p>
+          <p className="font-mono text-xs text-muted-foreground">{row.slug}</p>
         </div>
       ),
     },
@@ -101,11 +101,11 @@ export default function OrganizationsPage() {
       header: "Callback URL",
       cell: (row) =>
         row.callback_url ? (
-          <span className="text-xs text-slate-500 font-mono truncate max-w-[200px] block">
+          <span className="text-xs text-muted-foreground font-mono truncate max-w-[200px] block">
             {row.callback_url}
           </span>
         ) : (
-          <span className="text-slate-400 text-xs">Not set</span>
+          <span className="text-muted-foreground text-xs">Not set</span>
         ),
     },
     {
@@ -121,7 +121,7 @@ export default function OrganizationsPage() {
         <Button
           variant="outline"
           onClick={() => handleManage(row)}
-          className="h-7 text-xs px-2.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+          className="h-7 text-xs px-2.5"
         >
           <ExternalLink className="h-3 w-3 mr-1" />
           Manage

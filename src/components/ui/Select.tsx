@@ -28,16 +28,16 @@ export function Select({
   return (
     <div className={cn("w-full", className)}>
       {label && (
-        <label className="block text-sm font-medium leading-6 text-slate-900 mb-1">
+        <label className="block text-sm font-medium leading-6 text-foreground mb-1">
           {label}
         </label>
       )}
       <Listbox value={value} onChange={onChange}>
         <div className="relative">
-          <ListboxButton className="relative w-full cursor-default rounded-md bg-white py-2 pl-3 pr-10 text-left text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+          <ListboxButton className="relative w-full cursor-default rounded-md bg-background py-2 pl-3 pr-10 text-left text-foreground shadow-sm ring-1 ring-inset ring-input focus:outline-none focus:ring-2 focus:ring-ring sm:text-sm sm:leading-6">
             <span className="block truncate">{value.name}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-              <ChevronsUpDown className="h-5 w-5 text-slate-400" aria-hidden="true" />
+              <ChevronsUpDown className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
             </span>
           </ListboxButton>
 
@@ -47,13 +47,13 @@ export function Select({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-popover py-1 text-base shadow-lg ring-1 ring-border focus:outline-none sm:text-sm">
               {options.map((option) => (
                 <ListboxOption
                   key={option.id}
                   className={({ focus }) =>
                     cn(
-                      focus ? "bg-indigo-600 text-white outline-none" : "text-slate-900",
+                      focus ? "bg-accent text-accent-foreground outline-none" : "text-foreground",
                       "relative cursor-default select-none py-2 pl-3 pr-9"
                     )
                   }
@@ -68,7 +68,7 @@ export function Select({
                       {selected ? (
                         <span
                           className={cn(
-                            focus ? "text-white" : "text-indigo-600",
+                            focus ? "text-accent-foreground" : "text-primary",
                             "absolute inset-y-0 right-0 flex items-center pr-4"
                           )}
                         >

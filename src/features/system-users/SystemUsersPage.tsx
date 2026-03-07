@@ -85,8 +85,8 @@ export default function SystemUsersPage() {
       header: "Name",
       cell: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.name}</p>
-          <p className="text-xs text-slate-400">@{row.user_name}</p>
+          <p className="font-medium text-foreground">{row.name}</p>
+          <p className="text-xs text-muted-foreground">@{row.user_name}</p>
         </div>
       ),
     },

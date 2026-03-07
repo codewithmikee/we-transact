@@ -35,12 +35,12 @@ export function ConfirmDialog({
       showCloseButton={false}
     >
       <div className="flex flex-col items-center gap-4 text-center py-2">
-        <div className={`p-3 rounded-full ${destructive ? "bg-red-50" : "bg-amber-50"}`}>
-          <AlertTriangle className={`h-6 w-6 ${destructive ? "text-red-500" : "text-amber-500"}`} />
+        <div className={`p-3 rounded-full ${destructive ? "bg-destructive/10" : "bg-amber-500/10"}`}>
+          <AlertTriangle className={`h-6 w-6 ${destructive ? "text-destructive" : "text-amber-600 dark:text-amber-400"}`} />
         </div>
         <div className="space-y-1">
-          <p className="text-base font-semibold text-slate-900">{title}</p>
-          <p className="text-sm text-slate-500">{message}</p>
+          <p className="text-base font-semibold text-foreground">{title}</p>
+          <p className="text-sm text-muted-foreground">{message}</p>
         </div>
         <div className="flex gap-3 w-full">
           <Button
@@ -52,8 +52,8 @@ export function ConfirmDialog({
             Cancel
           </Button>
           <Button
-            variant="primary"
-            className={`flex-1 ${destructive ? "bg-red-600 hover:bg-red-700" : ""}`}
+            variant={destructive ? "danger" : "primary"}
+            className="flex-1"
             onClick={onConfirm}
             disabled={isLoading}
           >

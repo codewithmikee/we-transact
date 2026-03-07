@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   Plus,
   Trash2,
   RefreshCw,
   ToggleLeft,
   ToggleRight,
-  ChevronDown,
-  ChevronRight,
 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,15 +24,11 @@ import { ActionMenu } from "@/components/data/ActionMenu";
 import { ConfirmDialog } from "@/components/data/ConfirmDialog";
 import { SearchInput } from "@/components/data/SearchInput";
 import { PaginationBar } from "@/components/data/PaginationBar";
-import { StatusBadge, AvailabilityBadge, AccountStatusBadge } from "@/components/data/StatusBadge";
+import { StatusBadge, AvailabilityBadge } from "@/components/data/StatusBadge";
 import { CopyField } from "@/components/data/CopyButton";
-import { PaymentAgentResource, AgentAccountResource } from "@/types/api.types";
+import { PaymentAgentResource } from "@/types/api.types";
 import {
-  useAgentAccounts,
-  useAvailableBanks,
-  useCreateAgentAccount,
   useCreatePaymentAgent,
-  useDeleteAgentAccount,
   useDeletePaymentAgent,
   useGenerateConnectCode,
   usePaymentAgents,
@@ -64,196 +60,12 @@ const createAgentSchema = z
 
 type CreateAgentForm = z.infer<typeof createAgentSchema>;
 
-const createAccountSchema = z.object({
-  bank_id: z.string().min(1, "Bank is required"),
-  holder_name: z.string().min(2, "Holder name is required"),
-  account_number: z.string().min(4, "Account number is required"),
-});
-
-type CreateAccountForm = z.infer<typeof createAccountSchema>;
-
-// ── Agent Accounts Sub-panel ───────────────────────────────────────────────────
-
-function AgentAccountsPanel({ agent }: { agent: PaymentAgentResource }) {
-  const [showAddAccount, setShowAddAccount] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<AgentAccountResource | null>(null);
-
-  const { data: accounts, isLoading } = useAgentAccounts(agent.id);
-  const { data: banksData } = useAvailableBanks();
-  const createAccount = useCreateAgentAccount();
-  const deleteAccount = useDeleteAgentAccount();
-
-
-  const bankOptions =
-    banksData?.map((b) => ({ id: b.id, name: `${b.name} (${b.code})` })) ?? [];
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    control,
-    formState: { errors },
-  } = useForm<CreateAccountForm>({ resolver: zodResolver(createAccountSchema) });
-
-  const handleCreateAccount = handleSubmit(async (values) => {
-    await createAccount.mutateAsync({ agentUuid: agent.id, data: values });
-    setShowAddAccount(false);
-    reset();
-  });
-
-  const handleDeleteAccount = async () => {
-    if (!deleteTarget) return;
-    await deleteAccount.mutateAsync({ agentUuid: agent.id, accountUuid: deleteTarget.id });
-    setDeleteTarget(null);
-  };
-
-  const accountColumns: Column<AgentAccountResource>[] = [
-    {
-      key: "bank",
-      header: "Bank",
-      cell: (row) => (
-        <div>
-          <p className="font-medium text-slate-800">{row.bank.name}</p>
-          <p className="text-xs text-slate-400">{row.bank.code}</p>
-        </div>
-      ),
-    },
-    {
-      key: "holder",
-      header: "Holder",
-      cell: (row) => row.holder_name,
-    },
-    {
-      key: "account_number",
-      header: "Account No.",
-      cell: (row) => <span className="font-mono text-sm">{row.account_number}</span>,
-    },
-    {
-      key: "status",
-      header: "Status",
-      cell: (row) => <AccountStatusBadge status={row.status} />,
-    },
-    {
-      key: "active",
-      header: "Active",
-      cell: (row) => <StatusBadge active={row.is_active} />,
-    },
-    {
-      key: "actions",
-      header: "",
-      className: "w-10",
-      cell: (row) => (
-        <ActionMenu
-          actions={[
-            {
-              label: "Delete",
-              icon: Trash2,
-              onClick: () => setDeleteTarget(row),
-              destructive: true,
-            },
-          ]}
-        />
-      ),
-    },
-  ];
-
-  return (
-    <div className="bg-slate-50 border-t border-slate-200 px-4 py-4">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold text-slate-700">
-          Accounts ({accounts?.data.length ?? 0})
-        </p>
-        <Button variant="outline" onClick={() => setShowAddAccount(true)} className="h-7 text-xs px-2.5">
-          <Plus className="h-3 w-3 mr-1" />
-          Add Account
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <p className="text-xs text-slate-400 py-2">Loading accounts…</p>
-      ) : !accounts?.data.length ? (
-        <p className="text-xs text-slate-400 py-2">No accounts linked to this agent.</p>
-      ) : (
-        <DataTable
-          columns={accountColumns}
-          data={accounts.data}
-          keyExtractor={(r) => r.id}
-          skeletonRows={2}
-        />
-      )}
-
-      {/* Add Account Modal */}
-      <AppDialog
-        open={showAddAccount}
-        onClose={() => { setShowAddAccount(false); reset(); }}
-        title="Add Bank Account"
-        maxWidth="md"
-      >
-        <form onSubmit={handleCreateAccount} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Bank</label>
-            <Controller
-              control={control}
-              name="bank_id"
-              render={({ field }) => (
-                <Select
-                  options={bankOptions}
-                  value={bankOptions.find((b) => b.id === field.value) ?? { id: "", name: "Select bank…" }}
-                  onChange={(opt) => field.onChange(opt.id)}
-                />
-              )}
-            />
-            {errors.bank_id && (
-              <p className="text-xs text-red-500 mt-1">{errors.bank_id.message}</p>
-            )}
-          </div>
-          <Input
-            label="Account Holder Name"
-            error={errors.holder_name?.message}
-            {...register("holder_name")}
-          />
-          <Input
-            label="Account Number"
-            error={errors.account_number?.message}
-            {...register("account_number")}
-          />
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => { setShowAddAccount(false); reset(); }}
-              disabled={createAccount.isPending}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" disabled={createAccount.isPending}>
-              {createAccount.isPending ? "Adding…" : "Add Account"}
-            </Button>
-          </div>
-        </form>
-      </AppDialog>
-
-      {/* Delete Account Confirm */}
-      <ConfirmDialog
-        isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDeleteAccount}
-        title="Delete Account"
-        message={`Delete account "${deleteTarget?.account_number}" from ${deleteTarget?.bank.name}? This cannot be undone.`}
-        confirmLabel="Delete"
-        destructive
-        isLoading={deleteAccount.isPending}
-      />
-    </div>
-  );
-}
-
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
+  const { slug } = useParams<{ slug: string }>();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PaymentAgentResource | null>(null);
   const [toggleTarget, setToggleTarget] = useState<PaymentAgentResource | null>(null);
@@ -263,7 +75,7 @@ export default function AgentsPage() {
     password?: string;
   } | null>(null);
 
-  const { data, isLoading, isError } = usePaymentAgents({ page, per_page: 15, search });
+  const { data, isLoading, isError, refetch } = usePaymentAgents({ page, per_page: 15, search });
   const createMutation = useCreatePaymentAgent();
   const updateMutation = useUpdatePaymentAgent();
   const deleteMutation = useDeletePaymentAgent();
@@ -314,35 +126,21 @@ export default function AgentsPage() {
 
   const columns: Column<PaymentAgentResource>[] = [
     {
-      key: "expand",
-      header: "",
-      className: "w-8",
-      cell: (row) => (
-        <button
-          onClick={() => setExpandedId(expandedId === row.id ? null : row.id)}
-          className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          {expandedId === row.id ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </button>
-      ),
-    },
-    {
       key: "name",
       header: "Name",
       cell: (row) => (
-        <div>
-          <p className="font-medium text-slate-900">{row.name}</p>
+        <Link
+          href={`/org/${slug}/agents/${row.id}`}
+          className="group block"
+        >
+          <p className="font-medium text-foreground group-hover:text-primary transition-colors">{row.name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <Badge variant={row.type === "user" ? "info" : "secondary"} className="text-[10px] py-0">
               {row.type}
             </Badge>
-            <span className="font-mono text-xs text-slate-400">{row.login_code}</span>
+            <span className="font-mono text-xs text-muted-foreground">{row.login_code}</span>
           </div>
-        </div>
+        </Link>
       ),
     },
     {
@@ -356,20 +154,13 @@ export default function AgentsPage() {
       ),
     },
     {
-      key: "accounts",
-      header: "Accounts",
-      cell: (row) => (
-        <span className="text-slate-600">{row.accounts?.length ?? 0}</span>
-      ),
-    },
-    {
       key: "last_seen",
       header: "Last Seen",
       cell: (row) =>
         row.last_seen ? (
           new Date(row.last_seen).toLocaleString()
         ) : (
-          <span className="text-slate-400">Never</span>
+          <span className="text-muted-foreground">Never</span>
         ),
     },
     {
@@ -412,7 +203,7 @@ export default function AgentsPage() {
         title="Agents"
         description="Manage payment agents and their linked bank accounts."
         breadcrumbs={[
-          { label: "Dashboard", href: ".." },
+          { label: "Dashboard", href: `/org/${slug}` },
           { label: "Agents", isCurrent: true },
         ]}
       />
@@ -430,68 +221,22 @@ export default function AgentsPage() {
         </Button>
       </div>
 
-      {/* Table with expandable accounts row */}
-      <div className="rounded-lg border border-slate-200 overflow-hidden bg-white">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                {columns.map((col) => (
-                  <th
-                    key={col.key}
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap"
-                  >
-                    {col.header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {isLoading &&
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    {columns.map((col) => (
-                      <td key={col.key} className="px-4 py-3">
-                        <div className="h-4 bg-slate-100 rounded animate-pulse w-24" />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-
-              {!isLoading && !isError && (!data?.data.length) && (
-                <tr>
-                  <td colSpan={columns.length} className="px-4 py-12 text-center text-slate-400 text-sm">
-                    No agents yet. Add your first agent.
-                  </td>
-                </tr>
-              )}
-
-              {!isLoading &&
-                data?.data.map((agent) => (
-                  <>
-                    <tr
-                      key={agent.id}
-                      className="hover:bg-slate-50 transition-colors"
-                    >
-                      {columns.map((col) => (
-                        <td key={col.key} className="px-4 py-3 text-slate-700">
-                          {col.cell(agent)}
-                        </td>
-                      ))}
-                    </tr>
-                    {expandedId === agent.id && (
-                      <tr key={`${agent.id}-accounts`}>
-                        <td colSpan={columns.length} className="p-0">
-                          <AgentAccountsPanel agent={agent} />
-                        </td>
-                      </tr>
-                    )}
-                  </>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={data?.data}
+        keyExtractor={(r) => r.id}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={refetch}
+        emptyTitle="No agents yet"
+        emptyDescription="Add your first agent to start accepting payments."
+        emptyAction={
+          <Button variant="primary" onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Agent
+          </Button>
+        }
+      />
 
       <PaginationBar meta={data?.meta} onPageChange={setPage} className="mt-3" />
 
@@ -568,13 +313,13 @@ export default function AgentsPage() {
         maxWidth="sm"
       >
         <div className="space-y-4">
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm text-amber-600 dark:text-amber-400">
             Copy the temporary password now — it will not be shown again.
           </div>
           {createdAgentSecret?.password && (
             <CopyField value={createdAgentSecret.password} label="Temporary Password" />
           )}
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Username: <span className="font-mono font-medium">{createdAgentSecret?.agent.agent_user?.user_name}</span>
           </p>
           <div className="flex justify-end">
@@ -593,14 +338,14 @@ export default function AgentsPage() {
         maxWidth="sm"
       >
         <div className="space-y-4">
-          <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
+          <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-blue-600 dark:text-blue-400">
             Share this code with the device to connect it. The code expires soon.
           </div>
           {connectCodeAgent?.connect_code && (
             <CopyField value={connectCodeAgent.connect_code} label="Connect Code" />
           )}
           {connectCodeAgent?.connect_code_expires_at && (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Expires: {new Date(connectCodeAgent.connect_code_expires_at).toLocaleString()}
             </p>
           )}

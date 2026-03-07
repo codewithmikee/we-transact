@@ -19,9 +19,9 @@ export default function Loading() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-slate-200 overflow-hidden">
+      <div className="rounded-lg border border-border overflow-hidden">
         {/* Table header */}
-        <div className="bg-slate-50 px-4 py-3 flex gap-4 border-b border-slate-200">
+        <div className="bg-muted/40 px-4 py-3 flex gap-4 border-b border-border">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-4 w-20" />
@@ -31,7 +31,7 @@ export default function Loading() {
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="px-4 py-3.5 flex items-center gap-4 border-b border-slate-100 last:border-0"
+            className="px-4 py-3.5 flex items-center gap-4 border-b border-border last:border-0"
           >
             <Skeleton className="h-4 w-36" />
             <Skeleton className="h-4 w-48" />

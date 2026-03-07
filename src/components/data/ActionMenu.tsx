@@ -22,7 +22,7 @@ interface ActionMenuProps {
 export function ActionMenu({ actions, align = "end" }: ActionMenuProps) {
   return (
     <Menu as="div" className="relative inline-block z-50 text-left">
-      <MenuButton className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none">
+      <MenuButton className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none">
         <MoreHorizontal className="h-4 w-4" />
       </MenuButton>
 
@@ -37,7 +37,7 @@ export function ActionMenu({ actions, align = "end" }: ActionMenuProps) {
       >
         <MenuItems
           className={cn(
-            "absolute z-50 mt-1 w-44 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none",
+            "absolute z-50 mt-1 w-44 rounded-md bg-popover shadow-lg ring-1 ring-border focus:outline-none",
             align === "end" ? "right-0" : "left-0",
           )}
         >
@@ -52,9 +52,9 @@ export function ActionMenu({ actions, align = "end" }: ActionMenuProps) {
                       disabled={disabled}
                       className={cn(
                         "flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors",
-                        focus && !action.destructive && "bg-slate-50",
-                        focus && action.destructive && "bg-red-50",
-                        action.destructive ? "text-red-600" : "text-slate-700",
+                        focus && !action.destructive && "bg-accent text-accent-foreground",
+                        focus && action.destructive && "bg-destructive/10 text-destructive",
+                        action.destructive ? "text-destructive" : "text-foreground",
                         disabled && "opacity-40 cursor-not-allowed",
                       )}
                     >

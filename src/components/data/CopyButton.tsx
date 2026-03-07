@@ -24,12 +24,12 @@ export function CopyButton({ value, className }: CopyButtonProps) {
       onClick={handleCopy}
       title="Copy to clipboard"
       className={cn(
-        "inline-flex items-center justify-center p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors",
+        "inline-flex items-center justify-center p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
         className,
       )}
     >
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-emerald-500" />
+        <Check className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
       ) : (
         <Copy className="h-3.5 w-3.5" />
       )}
@@ -47,8 +47,8 @@ export function CopyField({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      {label && <span className="text-slate-500 text-xs">{label}</span>}
-      <code className="text-xs font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 max-w-[200px] truncate">
+      {label && <span className="text-muted-foreground text-xs">{label}</span>}
+      <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded text-foreground max-w-[200px] truncate">
         {value}
       </code>
       <CopyButton value={value} />

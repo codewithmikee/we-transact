@@ -153,8 +153,8 @@ export default function OrgEditPage() {
                 />
                 <div className="flex items-center justify-between py-2">
                   <div>
-                    <p className="text-sm font-medium text-slate-700">Active</p>
-                    <p className="text-xs text-slate-500">Inactive orgs cannot log in</p>
+                    <p className="text-sm font-medium text-foreground/80">Active</p>
+                    <p className="text-xs text-muted-foreground">Inactive orgs cannot log in</p>
                   </div>
                   <Toggle
                     checked={isActive}
@@ -169,7 +169,6 @@ export default function OrgEditPage() {
                 type="button"
                 variant="outline"
                 onClick={handleManage}
-                className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Manage as Org Admin

@@ -47,13 +47,13 @@ export function AccountStatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     active: "bg-primary/10 text-primary",
     inactive: "bg-muted text-muted-foreground",
-    suspended: "bg-amber-50 text-amber-700",
+    suspended: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   };
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize",
-        map[status] ?? "bg-slate-100 text-slate-500",
+        map[status] ?? "bg-muted text-muted-foreground",
       )}
     >
       {status}
