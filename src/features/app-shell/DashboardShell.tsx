@@ -18,7 +18,7 @@ import {
   MenuItems,
   Transition,
 } from "@headlessui/react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AppLogo } from "@/components/layout/AppLogo";
 import { cn } from "@/lib/utils";
 import {
@@ -78,13 +78,6 @@ function flattenNavItems(items: NavConfig[], role: UserRole | null) {
   return visibleItems;
 }
 
-function resolveLink(link: string, params: Record<string, string | string[] | undefined>) {
-  return link.replace(/\[(\w+)\]/g, (_, key) => {
-    const value = params[key];
-    return Array.isArray(value) ? value[0] ?? `[${key}]` : value ?? `[${key}]`;
-  });
-}
-
 function prettifySegment(segment: string) {
   return segment
     .replace(/-/g, " ")
@@ -97,19 +90,10 @@ function getShellKind(pathname: string): ShellKind {
   return "generic";
 }
 
-function getDefaultHomeHref(kind: ShellKind, role: UserRole | null, orgSlug?: string) {
-  if (kind === "org" && orgSlug) {
-    return `/org/${orgSlug}`;
-  }
-
-  if (kind === "system") {
-    return "/system";
-  }
-
-  if (role === "org_admin" || role === "org_super_admin") {
-    return orgSlug ? `/org/${orgSlug}` : "/login";
-  }
-
+function getDefaultHomeHref(kind: ShellKind, role: UserRole | null) {
+  if (kind === "org") return "/org";
+  if (kind === "system") return "/system";
+  if (role === "org_admin" || role === "org_super_admin") return "/org";
   return role ? "/system" : "/login";
 }
 
@@ -293,10 +277,10 @@ function ProfileMenu({
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const params = useParams<Record<string, string | string[]>>();
   const role = useSessionStore((state) => state.user?.role ?? null);
   const user = useSessionStore((state) => state.user);
   const accessToken = useSessionStore((state) => state.accessToken);
+  const activeOrgName = useSessionStore((state) => state.activeOrgName);
   const clearSession = useSessionStore((state) => state.clearSession);
   const router = useRouter();
 
@@ -308,10 +292,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const shellKind = getShellKind(pathname);
-  const defaultOrgSlug =
-    typeof params.slug === "string"
-      ? params.slug
-      : user?.organization?.slug;
   const navConfig =
     shellKind === "org"
       ? ORGANiZATION_USER_NAV_ITEMS
@@ -324,13 +304,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const navItems = flattenNavItems(navConfig, role);
   const resolvedNavItems = navItems.map((item) => ({
     ...item,
-    href: resolveLink(item.link, params),
+    href: item.link,
   }));
-  const homeHref = getDefaultHomeHref(shellKind, role, defaultOrgSlug);
+  const homeHref = getDefaultHomeHref(shellKind, role);
   const currentTitle = getCurrentTitle(pathname, resolvedNavItems, homeHref);
   const isNestedMobileView = pathname !== homeHref;
   const roleLabel = role ? ROLE_LABELS[role] : "Authenticated User";
-  const orgLabel = defaultOrgSlug ? prettifySegment(defaultOrgSlug) : "Organization";
+  const orgLabel = activeOrgName ?? user?.organization?.name ?? "Organization";
   const showOrgBanner =
     shellKind === "org" && (role === "sy_admin" || role === "sy_super_admin");
 

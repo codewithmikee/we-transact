@@ -76,8 +76,8 @@ export default function OrganizationsPage() {
   };
 
   const handleManage = (org: OrgResource) => {
-    setActiveOrg(org.id);
-    router.push(`/org/${org.slug}`);
+    setActiveOrg(org.id, org.name);
+    router.push('/org');
   };
 
   const columns: Column<OrgResource>[] = [

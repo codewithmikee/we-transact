@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   Plus,
   Trash2,
@@ -63,7 +62,7 @@ type CreateAgentForm = z.infer<typeof createAgentSchema>;
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
-  const { slug } = useParams<{ slug: string }>();
+  
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [showCreate, setShowCreate] = useState(false);
@@ -130,7 +129,7 @@ export default function AgentsPage() {
       header: "Name",
       cell: (row) => (
         <Link
-          href={`/org/${slug}/agents/${row.id}`}
+          href={`/org/agents/${row.id}`}
           className="group block"
         >
           <p className="font-medium text-foreground group-hover:text-primary transition-colors">{row.name}</p>
@@ -203,7 +202,7 @@ export default function AgentsPage() {
         title="Agents"
         description="Manage payment agents and their linked bank accounts."
         breadcrumbs={[
-          { label: "Dashboard", href: `/org/${slug}` },
+          { label: "Dashboard", href: "/org" },
           { label: "Agents", isCurrent: true },
         ]}
       />

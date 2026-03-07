@@ -92,8 +92,8 @@ export default function OrgEditPage() {
 
   const handleManage = () => {
     if (!currentOrg) return;
-    setActiveOrg(currentOrg.id);
-    router.push(`/org/${currentOrg.slug}`);
+    setActiveOrg(currentOrg.id, currentOrg.name);
+    router.push('/org');
   };
 
   return (

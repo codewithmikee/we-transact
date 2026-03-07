@@ -101,7 +101,7 @@ function AgentAccountsSection({ agentUuid }: { agentUuid: string }) {
   const openEdit = (account: AgentAccountResource) => {
     setEditTarget(account);
     reset({
-      bank_id: account.bank_id,
+      bank_id: account.bank.id,
       holder_name: account.holder_name,
       account_number: account.account_number,
     });
@@ -249,10 +249,10 @@ function AgentAccountsSection({ agentUuid }: { agentUuid: string }) {
 // ── Detail Page ───────────────────────────────────────────────────────────────
 
 export default function AgentDetailPage() {
-  const { slug, agentId } = useParams<{ slug: string; agentId: string }>();
+  const { agentId } = useParams<{ agentId: string }>();
   const router = useRouter();
 
-  const { data: agent, isLoading, isError } = usePaymentAgent(agentId);
+  const { data: agent, isPending, isError } = usePaymentAgent(agentId);
   const updateMutation = useUpdatePaymentAgent();
   const connectCodeMutation = useGenerateConnectCode();
   const [connectCodeAgent, setConnectCodeAgent] = useState<PaymentAgentResource | null>(null);
@@ -271,7 +271,7 @@ export default function AgentDetailPage() {
     setConnectCodeAgent(updated);
   };
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-48" />
@@ -298,7 +298,7 @@ export default function AgentDetailPage() {
     <>
       <div className="mb-6">
         <Link
-          href={`/org/${slug}/agents`}
+          href="/org/agents"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -310,8 +310,8 @@ export default function AgentDetailPage() {
         title={agent.name}
         description={`Manage agent details and bank accounts.`}
         breadcrumbs={[
-          { label: "Dashboard", href: `/org/${slug}` },
-          { label: "Agents", href: `/org/${slug}/agents` },
+          { label: "Dashboard", href: "/org" },
+          { label: "Agents", href: "/org/agents" },
           { label: agent.name, isCurrent: true },
         ]}
       />

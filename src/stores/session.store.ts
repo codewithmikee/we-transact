@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { UserResource, UserRole } from "@/types/api.types";
 
 const ACTIVE_ORG_KEY = "activeOrgUuid";
+const ACTIVE_ORG_NAME_KEY = "activeOrgName";
 
 interface SessionState {
   user: UserResource | null;
@@ -9,6 +10,8 @@ interface SessionState {
   tokenExpiresAt: string | null;
   /** UUID of the org a system admin is currently managing (null = system level) */
   activeOrgUuid: string | null;
+  /** Display name of the org a system admin is currently managing */
+  activeOrgName: string | null;
   /** True once initial auth bootstrap has completed (we know if user is logged in or not). */
   isSessionReady: boolean;
 
@@ -18,7 +21,7 @@ interface SessionState {
     tokenExpiresAt: string;
   }) => void;
   setAccessToken: (token: string, expiresAt?: string) => void;
-  setActiveOrg: (uuid: string | null) => void;
+  setActiveOrg: (uuid: string | null, name?: string | null) => void;
   clearSession: () => void;
   markSessionReady: () => void;
 }
@@ -32,6 +35,10 @@ export const useSessionStore = create<SessionState>((set) => ({
     typeof window !== "undefined"
       ? sessionStorage.getItem(ACTIVE_ORG_KEY)
       : null,
+  activeOrgName:
+    typeof window !== "undefined"
+      ? sessionStorage.getItem(ACTIVE_ORG_NAME_KEY)
+      : null,
   isSessionReady: false,
 
   setSession: ({ user, accessToken, tokenExpiresAt }) =>
@@ -43,26 +50,34 @@ export const useSessionStore = create<SessionState>((set) => ({
       tokenExpiresAt: tokenExpiresAt ?? s.tokenExpiresAt,
     })),
 
-  setActiveOrg: (activeOrgUuid) => {
+  setActiveOrg: (activeOrgUuid, name) => {
+    const activeOrgName = name ?? null;
     if (typeof window !== "undefined") {
       if (activeOrgUuid) {
         sessionStorage.setItem(ACTIVE_ORG_KEY, activeOrgUuid);
       } else {
         sessionStorage.removeItem(ACTIVE_ORG_KEY);
       }
+      if (activeOrgName) {
+        sessionStorage.setItem(ACTIVE_ORG_NAME_KEY, activeOrgName);
+      } else {
+        sessionStorage.removeItem(ACTIVE_ORG_NAME_KEY);
+      }
     }
-    set({ activeOrgUuid });
+    set({ activeOrgUuid, activeOrgName });
   },
 
   clearSession: () => {
     if (typeof window !== "undefined") {
       sessionStorage.removeItem(ACTIVE_ORG_KEY);
+      sessionStorage.removeItem(ACTIVE_ORG_NAME_KEY);
     }
     set({
       user: null,
       accessToken: null,
       tokenExpiresAt: null,
       activeOrgUuid: null,
+      activeOrgName: null,
       isSessionReady: true,
     });
   },

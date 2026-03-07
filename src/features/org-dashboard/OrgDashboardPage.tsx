@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { Users, Key, CreditCard, UserCog } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
@@ -46,9 +45,6 @@ function StatCard({
 }
 
 export default function OrgDashboardPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const base = `/org/${slug}`;
-
   const { data: org, isLoading: orgLoading } = useOrg();
   const { data: admins, isLoading: adminsLoading } = useOrgAdmins({ per_page: 1 });
   const { data: agents, isLoading: agentsLoading } = usePaymentAgents({ per_page: 1 });
@@ -68,28 +64,28 @@ export default function OrgDashboardPage() {
           title="Admins"
           value={admins?.meta.total}
           icon={UserCog}
-          href={`${base}/admins`}
+          href="/org/admins"
           isLoading={adminsLoading}
         />
         <StatCard
           title="Agents"
           value={agents?.meta.total}
           icon={Users}
-          href={`${base}/agents`}
+          href="/org/agents"
           isLoading={agentsLoading}
         />
         <StatCard
           title="API Keys"
           value={keys?.meta.total}
           icon={Key}
-          href={`${base}/integrations`}
+          href="/org/integrations"
           isLoading={keysLoading}
         />
         <StatCard
           title="Payment Settings"
           value="View"
           icon={CreditCard}
-          href={`${base}/payment-setting`}
+          href="/org/payment-setting"
           isLoading={false}
         />
       </div>

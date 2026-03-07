@@ -30,13 +30,8 @@ export async function proxy(req: NextRequest) {
       );
     }
     if (!SYSTEM_ROLES.includes(session.role)) {
-      // Org user tried to hit system route — send them to their org
-      if (session.orgSlug) {
-        return NextResponse.redirect(
-          new URL(`/org/${session.orgSlug}`, req.url),
-        );
-      }
-      return NextResponse.redirect(new URL("/login", req.url));
+      // Org user tried to hit system route — send them to their org dashboard
+      return NextResponse.redirect(new URL("/org", req.url));
     }
   }
 
@@ -60,10 +55,8 @@ export async function proxy(req: NextRequest) {
     if (SYSTEM_ROLES.includes(session.role)) {
       return NextResponse.redirect(new URL("/system", req.url));
     }
-    if (ORG_ROLES.includes(session.role) && session.orgSlug) {
-      return NextResponse.redirect(
-        new URL(`/org/${session.orgSlug}`, req.url),
-      );
+    if (ORG_ROLES.includes(session.role)) {
+      return NextResponse.redirect(new URL("/org", req.url));
     }
   }
 

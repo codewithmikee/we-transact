@@ -2,12 +2,12 @@ import { NavConfig, NavItemContent } from "@/types/nav.types";
 
 export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
     {
-        link: '/org/:slug',
+        link: '/org',
         title: "Dashboard",
         icon: 'LayoutDashboard',
     },
     {
-        link: '/org/:slug/integrations',
+        link: '/org/integrations',
         title: "Integrations",
         icon: 'LinkIcon',
     },
@@ -15,12 +15,12 @@ export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
         title: "Management",
         items: [
             {
-                link: '/org/:slug/agents',
+                link: '/org/agents',
                 title: "Agents",
                 icon: 'Users',
             },
             {
-                link: '/org/:slug/payment-setting',
+                link: '/org/payment-setting',
                 title: "Payment Setting",
                 icon: 'CreditCard',
                 preventerUserRoles: [ "org_admin" ]
@@ -28,7 +28,7 @@ export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
         ]
     },
     {
-        link: '/org/:slug/admins',
+        link: '/org/admins',
         title: 'Admins',
         icon: 'UserCog',
         preventerUserRoles: [ "org_admin" ]
