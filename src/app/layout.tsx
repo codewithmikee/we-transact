@@ -1,9 +1,22 @@
+import type { Metadata } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
+import { Toaster } from "sonner"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SessionProvider } from "@/providers/SessionProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
 import { cn } from "@/lib/utils";
+import { ProtectedAppWrapper } from "@/features/app-shell/ProtectedAppWrapper";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Trans Dashboard",
+    template: "%s | Trans Dashboard",
+  },
+  description: "Organization and payment management dashboard",
+  robots: { index: false, follow: false },
+}
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -28,10 +41,13 @@ export default function RootLayout({
     >
       <body className="font-sans">
         <ThemeProvider>
-          <SessionProvider>
-            {children}
-          </SessionProvider>
+          <QueryProvider>
+            <SessionProvider>
+              <ProtectedAppWrapper>{children}</ProtectedAppWrapper>
+            </SessionProvider>
+          </QueryProvider>
         </ThemeProvider>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   )

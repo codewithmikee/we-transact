@@ -3,13 +3,22 @@
 import { useEffect, useRef } from "react";
 import { useSessionStore } from "@/stores/session.store";
 import { refreshApi } from "@/lib/api/auth";
+import { bootstrapSession } from "@/lib/api/client";
+
+function getRefreshDelay(tokenExpiresAt: string) {
+  return Math.max(
+    5_000,
+    new Date(tokenExpiresAt).getTime() - Date.now() - 60_000,
+  );
+}
 
 /**
  * Mounts at the root layout (client boundary).
  *
  * Responsibilities:
  * 1. Bootstrap: on first client render, if no access token is in Zustand memory,
- *    calls /api/auth/refresh to rehydrate from the httpOnly refresh_token cookie.
+ *    calls bootstrapSession() — a shared singleton that prevents the SessionProvider
+ *    and the axios 401 interceptor from racing to call /api/auth/refresh concurrently.
  * 2. Proactive refresh: schedules a silent re-refresh 60 s before the token expires
  *    so the user is never interrupted by a 401.
  */
@@ -18,10 +27,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const scheduleRefresh = (tokenExpiresAt: string) => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    const delay = Math.max(
-      5_000,
-      new Date(tokenExpiresAt).getTime() - Date.now() - 60_000,
-    );
+    const delay = getRefreshDelay(tokenExpiresAt);
     timerRef.current = setTimeout(doRefresh, delay);
   };
 
@@ -44,8 +50,19 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const { accessToken } = useSessionStore.getState();
 
     if (!accessToken) {
-      // No token in memory (page refresh or first load) — try to rehydrate
-      doRefresh();
+      // No token in memory (page refresh or first load) — use the shared singleton
+      // so we don't race with the axios 401 interceptor calling /api/auth/refresh
+      // at the same time (which breaks rotating refresh tokens).
+      bootstrapSession()
+        .then((token) => {
+          if (token) {
+            const { tokenExpiresAt } = useSessionStore.getState();
+            if (tokenExpiresAt) scheduleRefresh(tokenExpiresAt);
+          }
+        })
+        .finally(() => {
+          useSessionStore.getState().markSessionReady();
+        });
     } else {
       // Token already in memory — schedule refresh based on the public cookie
       const expiresAtCookie = document.cookie
@@ -59,6 +76,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       if (expiresAtCookie) {
         scheduleRefresh(decodeURIComponent(expiresAtCookie));
       }
+      useSessionStore.getState().markSessionReady();
     }
 
     return () => {

@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AlertCircle, Eye, EyeOff, Loader2, LogIn } from "lucide-react";
-import { Modal } from "@/components/ui/Dialog";
+import AppDialog from "@/components/ui/AppDialog";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
@@ -13,13 +13,21 @@ import { useSessionStore } from "@/stores/session.store";
 interface LoginDialogProps {
   /** When true the dialog has no close button and cannot be dismissed */
   required?: boolean;
+  redirectTo?: string;
 }
 
-export function LoginDialog({ required = false }: LoginDialogProps) {
+export function LoginDialog({
+  required = false,
+  redirectTo,
+}: LoginDialogProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const setSession = useSessionStore((s) => s.setSession);
+
+  // Prevent SSR/hydration mismatch: HeadlessUI Dialog renders a portal on the
+  // client that doesn't exist during server rendering. Only open after mount.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -44,7 +52,11 @@ export function LoginDialog({ required = false }: LoginDialogProps) {
         tokenExpiresAt: data.tokenExpiresAt,
       });
 
-      const redirect = searchParams.get("redirect");
+      const redirect =
+        redirectTo ??
+        (typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("redirect")
+          : null);
       const { role, organization } = data.user;
 
       if (redirect) {
@@ -76,23 +88,25 @@ export function LoginDialog({ required = false }: LoginDialogProps) {
   };
 
   return (
-    <Modal
-      isOpen
+    <AppDialog
+      open={mounted}
       onClose={() => {
         if (!required) router.back();
       }}
+      canClose={!required && !loading}
+      showCloseButton={!required}
+      maxWidth="sm"
       title={
         <div className="flex items-center gap-2">
-          <LogIn className="h-5 w-5 text-indigo-600" />
+          <LogIn className="h-5 w-5 text-primary" />
           <span>Sign in to your account</span>
         </div>
       }
-      maxWidth="sm"
     >
       <form onSubmit={handleSubmit} className="space-y-5 pt-2">
         {/* Global error */}
         {error && (
-          <div className="flex items-start gap-2 rounded-md bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700">
+          <div className="flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -116,12 +130,12 @@ export function LoginDialog({ required = false }: LoginDialogProps) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className={cn(
-              fieldErrors.user_name ? "border-red-400 focus:ring-red-400" : "",
+              fieldErrors.user_name ? "border-destructive focus-visible:ring-destructive" : "",
             )}
             placeholder="Enter your username"
           />
           {fieldErrors.user_name && (
-            <p className="text-xs text-red-600">{fieldErrors.user_name[0]}</p>
+            <p className="text-xs text-destructive">{fieldErrors.user_name[0]}</p>
           )}
         </div>
 
@@ -144,7 +158,9 @@ export function LoginDialog({ required = false }: LoginDialogProps) {
               onChange={(e) => setPassword(e.target.value)}
               className={cn(
                 "pr-10",
-                fieldErrors.password ? "border-red-400 focus:ring-red-400" : "",
+                fieldErrors.password
+                  ? "border-destructive focus-visible:ring-destructive"
+                  : "",
               )}
               placeholder="Enter your password"
             />
@@ -162,7 +178,7 @@ export function LoginDialog({ required = false }: LoginDialogProps) {
             </button>
           </div>
           {fieldErrors.password && (
-            <p className="text-xs text-red-600">{fieldErrors.password[0]}</p>
+            <p className="text-xs text-destructive">{fieldErrors.password[0]}</p>
           )}
         </div>
 
@@ -182,6 +198,6 @@ export function LoginDialog({ required = false }: LoginDialogProps) {
           )}
         </Button>
       </form>
-    </Modal>
+    </AppDialog>
   );
 }

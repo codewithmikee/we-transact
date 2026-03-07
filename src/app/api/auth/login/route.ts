@@ -33,11 +33,8 @@ export async function POST(req: NextRequest) {
     maxAge: 60 * 60 * 24 * 30, // 30 days
   });
 
-  // httpOnly — used by middleware for routing decisions only.
-  // NOTE: this cookie is base64-encoded JSON, NOT cryptographically signed.
-  // The real auth protection is the Bearer token in memory + the httpOnly refresh_token.
-  // For production, consider signing this with iron-session or jose.
-  response.cookies.set("session", buildSessionCookie(user), {
+  // httpOnly — HMAC-SHA256 signed JWT used by middleware for routing decisions.
+  response.cookies.set("session", await buildSessionCookie(user), {
     ...COOKIE_OPTS,
     maxAge: 60 * 60 * 24 * 30,
   });

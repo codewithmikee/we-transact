@@ -3,10 +3,14 @@ import { cn } from "@/lib/utils";
 interface SpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
-  variant?: "indigo" | "slate";
+  variant?: "primary" | "muted";
 }
 
-export function Spinner({ size = "md", className, variant = "indigo" }: SpinnerProps) {
+export function Spinner({
+  size = "md",
+  className,
+  variant = "primary",
+}: SpinnerProps) {
   const sizes = {
     sm: "w-4 h-4 border-2",
     md: "w-8 h-8 border-4",
@@ -14,8 +18,8 @@ export function Spinner({ size = "md", className, variant = "indigo" }: SpinnerP
   };
 
   const variants = {
-    indigo: "border-indigo-200 border-t-indigo-600",
-    slate: "border-slate-200 border-t-slate-800",
+    primary: "border-primary/20 border-t-primary",
+    muted: "border-border border-t-foreground",
   };
 
   return (

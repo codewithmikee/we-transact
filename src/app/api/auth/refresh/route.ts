@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     maxAge: 60 * 60 * 24 * 30,
   });
 
-  response.cookies.set("session", buildSessionCookie(user), {
+  response.cookies.set("session", await buildSessionCookie(user), {
     ...COOKIE_OPTS,
     maxAge: 60 * 60 * 24 * 30,
   });

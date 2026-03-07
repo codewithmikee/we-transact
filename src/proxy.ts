@@ -4,15 +4,23 @@ import { parseSessionCookie } from "@/lib/api/cookies";
 const SYSTEM_ROLES = ["sy_super_admin", "sy_admin"];
 const ORG_ROLES = ["org_super_admin", "org_admin"];
 
-function getSession(req: NextRequest) {
+async function getSession(req: NextRequest) {
   const cookie = req.cookies.get("session")?.value;
   if (!cookie) return null;
   return parseSessionCookie(cookie);
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const session = getSession(req);
+  const session = await getSession(req);
+
+  if (pathname === "/change-password") {
+    if (!session) {
+      return NextResponse.redirect(
+        new URL(`/login?redirect=${encodeURIComponent(pathname)}`, req.url),
+      );
+    }
+  }
 
   // ── /system routes ─────────────────────────────────────────────────────────
   if (pathname.startsWith("/system")) {
@@ -63,5 +71,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/system/:path*", "/org/:path*", "/login"],
+  matcher: ["/system/:path*", "/org/:path*", "/change-password", "/login"],
 };

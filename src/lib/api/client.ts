@@ -16,22 +16,68 @@ export const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    "X-Requested-With": "XMLHttpRequest",
   },
 });
 
+// ── Shared bootstrap singleton ────────────────────────────────────────────────
+// Prevents SessionProvider and the 401 interceptor from calling /api/auth/refresh
+// concurrently (which breaks rotating refresh tokens).
+let _bootstrapPromise: Promise<string | null> | null = null;
+
+export function bootstrapSession(): Promise<string | null> {
+  // If token already in memory, return immediately
+  const existing = useSessionStore.getState().accessToken;
+  if (existing) return Promise.resolve(existing);
+
+  // Reuse in-flight promise to prevent concurrent refresh calls
+  if (_bootstrapPromise) return _bootstrapPromise;
+
+  _bootstrapPromise = (async () => {
+    try {
+      const res = await fetch("/api/auth/refresh", { method: "POST" });
+      if (!res.ok) {
+        useSessionStore.getState().clearSession();
+        return null;
+      }
+      const data = await res.json();
+      useSessionStore.getState().setSession({
+        user: data.user,
+        accessToken: data.accessToken,
+        tokenExpiresAt: data.tokenExpiresAt,
+      });
+      return data.accessToken as string;
+    } catch {
+      useSessionStore.getState().clearSession();
+      return null;
+    }
+  })();
+
+  // Reset after 2 s so future proactive refreshes can create a new promise
+  _bootstrapPromise.finally(() => {
+    setTimeout(() => {
+      _bootstrapPromise = null;
+    }, 2000);
+  });
+
+  return _bootstrapPromise;
+}
+
 // ── Request interceptor ──────────────────────────────────────────────────────
-// Attaches Bearer token and injects ?organization_uuid for system admins
-// who have selected an org context.
+// Attaches Bearer token and injects ?organization_uuid whenever an org context
+// is active (works for both org admins and system admins managing an org).
 apiClient.interceptors.request.use((config) => {
-  const { accessToken, user, activeOrgUuid } = useSessionStore.getState();
+  const { accessToken, activeOrgUuid, user } = useSessionStore.getState();
 
   if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+    config.headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  const isSystemAdmin =
-    user?.role === "sy_super_admin" || user?.role === "sy_admin";
-  if (isSystemAdmin && activeOrgUuid) {
+  // Only inject organization_uuid if:
+  // 1. An org is active
+  // 2. The user is a system admin (org admins context is handled by their token)
+  const isSystemAdmin = user?.role === "sy_super_admin" || user?.role === "sy_admin";
+  if (activeOrgUuid && isSystemAdmin) {
     config.params = { ...config.params, organization_uuid: activeOrgUuid };
   }
 
@@ -39,7 +85,7 @@ apiClient.interceptors.request.use((config) => {
 });
 
 // ── Response interceptor ─────────────────────────────────────────────────────
-// On 401 → silent refresh → retry queued requests.
+// On 401 → shared bootstrap refresh → retry queued requests.
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -63,7 +109,7 @@ apiClient.interceptors.response.use(
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then((token) => {
-          config.headers!.Authorization = `Bearer ${token}`;
+          config.headers.set("Authorization", `Bearer ${token}`);
           return apiClient(config);
         });
       }
@@ -72,12 +118,10 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await fetch("/api/auth/refresh", { method: "POST" });
-        if (!res.ok) throw new Error("Refresh failed");
-        const { accessToken } = await res.json();
-        useSessionStore.getState().setAccessToken(accessToken);
-        processQueue(null, accessToken);
-        config.headers!.Authorization = `Bearer ${accessToken}`;
+        const token = await bootstrapSession();
+        if (!token) throw new Error("Refresh failed");
+        processQueue(null, token);
+        config.headers.set("Authorization", `Bearer ${token}`);
         return apiClient(config);
       } catch (err) {
         processQueue(err, null);

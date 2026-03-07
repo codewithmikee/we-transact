@@ -1,23 +1,13 @@
 import { NavConfig, NavItemContent } from "@/types/nav.types";
-import { 
-    LayoutDashboard, 
-    Link as LinkIcon, 
-    Users, 
-    Settings, 
-    UserCog,
-    Building2,
-    Banknote,
-    CreditCard
-} from "lucide-react";
 
 export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
     {
-        link: '/org/[slug]',
+        link: '/org/:slug',
         title: "Dashboard",
         icon: 'LayoutDashboard',
     },
     {
-        link: '/org/[slug]/integrations',
+        link: '/org/:slug/integrations',
         title: "Integrations",
         icon: 'LinkIcon',
     },
@@ -25,12 +15,12 @@ export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
         title: "Management",
         items: [
             {
-                link: '/org/[slug]/agents',
+                link: '/org/:slug/agents',
                 title: "Agents",
                 icon: 'Users',
             },
             {
-                link: '/org/[slug]/payment-setting',
+                link: '/org/:slug/payment-setting',
                 title: "Payment Setting",
                 icon: 'CreditCard',
                 preventerUserRoles: [ "org_admin" ]
@@ -38,7 +28,7 @@ export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
         ]
     },
     {
-        link: '/org/[slug]/admins',
+        link: '/org/:slug/admins',
         title: 'Admins',
         icon: 'UserCog',
         preventerUserRoles: [ "org_admin" ]

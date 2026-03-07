@@ -17,11 +17,11 @@ export function PageHeader({ title, description, breadcrumbs, className }: PageH
         <Breadcrumbs items={breadcrumbs} />
       )}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
           {title}
         </h1>
         {description && (
-          <p className="text-lg text-slate-500 max-w-2xl leading-relaxed font-medium">
+          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
             {description}
           </p>
         )}
