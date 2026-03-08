@@ -1,5 +1,6 @@
 export {
   useAllBanks,
+  useBankReferencePlayground,
   useCreateBank,
   useUpdateBank,
   useDeleteBank,

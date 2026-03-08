@@ -5,6 +5,7 @@ export const ORGANiZATION_USER_NAV_ITEMS: NavConfig[] = [
         link: '/org',
         title: "Dashboard",
         icon: 'LayoutDashboard',
+        exact: true,
     },
     {
         link: '/org/transactions',
@@ -45,6 +46,7 @@ export const SYSTEM_ADMIN_NAV_ITEMS: NavItemContent[] = [
         link: '/system',
         title: "Dashboard",
         icon: 'LayoutDashboard',
+        exact: true,
     },
     {
         link: '/system/organizations',

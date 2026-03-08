@@ -100,15 +100,16 @@ export default function AppDialog({
         )}
       />
 
-      <div className="fixed inset-0 z-50 flex w-screen items-center justify-center p-4 sm:p-6">
-        <DialogPanel
-          transition
-          className={cn(
-            'relative w-full rounded-lg border border-border bg-popover p-6 text-left text-popover-foreground shadow-xl duration-300 ease-out data-closed:translate-y-2 data-closed:opacity-0 sm:my-8 sm:p-8',
-            maxWidthClasses[maxWidth],
-            panelClassName,
-          )}
-        >
+      <div className="fixed inset-0 z-50 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+          <DialogPanel
+            transition
+            className={cn(
+              'relative w-full rounded-xl border border-border bg-popover p-6 text-left text-popover-foreground shadow-2xl duration-300 ease-out data-closed:translate-y-4 data-closed:opacity-0 sm:my-8 sm:p-8',
+              maxWidthClasses[maxWidth],
+              panelClassName,
+            )}
+          >
           {showClose && (
             <CloseButton
               onClick={canClose ? handleClose : undefined}
@@ -141,6 +142,7 @@ export default function AppDialog({
           {footer && <div className="mt-6">{footer}</div>}
         </DialogPanel>
       </div>
-    </Dialog>
-  )
+    </div>
+  </Dialog>
+)
 }

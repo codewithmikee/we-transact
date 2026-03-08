@@ -4,7 +4,8 @@ export interface NavItemContent {
     title: string,
     link: string,
     icon?: string,
-    preventerUserRoles?: UserRole[]
+    preventerUserRoles?: UserRole[],
+    exact?: boolean
 }
 
 export interface NavGroup {

@@ -6,6 +6,8 @@ import { toastApiError } from "@/lib/api/error";
 import {
   ApiPaginatedResponse,
   ApiSuccessResponse,
+  BankReferencePlaygroundInput,
+  BankReferencePlaygroundResult,
   BankResource,
   PaginationQuery,
   StoreBankInput,
@@ -43,8 +45,8 @@ export function useCreateBank() {
   return useMutation({
     mutationFn: (data: StoreBankInput) =>
       apiClient
-        .post<ApiSuccessResponse<{ bank: BankResource }>>(PAYMENT_ENDPOINTS.BANKS, data)
-        .then((r) => r.data.data.bank),
+        .post<ApiSuccessResponse<BankResource>>(PAYMENT_ENDPOINTS.BANKS, data)
+        .then((r) => r.data.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["banks-all"] });
       qc.invalidateQueries({ queryKey: ["banks-available"] });
@@ -59,8 +61,8 @@ export function useUpdateBank() {
   return useMutation({
     mutationFn: ({ uuid, data }: { uuid: string; data: UpdateBankInput }) =>
       apiClient
-        .patch<ApiSuccessResponse<{ bank: BankResource }>>(PAYMENT_ENDPOINTS.BANK(uuid), data)
-        .then((r) => r.data.data.bank),
+        .patch<ApiSuccessResponse<BankResource>>(PAYMENT_ENDPOINTS.BANK(uuid), data)
+        .then((r) => r.data.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["banks-all"] });
       qc.invalidateQueries({ queryKey: ["banks-available"] });
@@ -79,6 +81,25 @@ export function useDeleteBank() {
       qc.invalidateQueries({ queryKey: ["banks-available"] });
       toast.success("Bank deleted");
     },
+    onError: toastApiError,
+  });
+}
+
+export function useBankReferencePlayground() {
+  return useMutation({
+    mutationFn: ({
+      uuid,
+      data,
+    }: {
+      uuid: string;
+      data: BankReferencePlaygroundInput;
+    }) =>
+      apiClient
+        .post<ApiSuccessResponse<BankReferencePlaygroundResult>>(
+          PAYMENT_ENDPOINTS.BANK_PLAYGROUND_REFERENCE(uuid),
+          data
+        )
+        .then((r) => r.data.data),
     onError: toastApiError,
   });
 }

@@ -146,6 +146,84 @@ export interface BankResource {
   updated_at: ISODateString;
 }
 
+export type BankReferenceInputFormat = "direct" | "url" | "sms" | "unknown";
+export type BankReferenceEvidenceSource = "agent_inbox" | "client_shared";
+
+export interface BankReferencePlaygroundResult {
+  bank: Pick<BankResource, "id" | "name" | "code">;
+  input: {
+    reference: string;
+    sms_sender: string | null;
+    evidence_source: BankReferenceEvidenceSource;
+    detected_format: BankReferenceInputFormat;
+  };
+  config_summary: {
+    has_config: boolean;
+    extractor_names: string[];
+    sms_sender_numbers: string[];
+    sms_sender_regexes: string[];
+    sms_pattern_names: string[];
+    receipt_lookup_enabled: boolean;
+  };
+  extraction: {
+    matched: boolean;
+    extractor_name: string | null;
+    normalized_reference: string | null;
+  };
+  parsed_transaction: {
+    matched: boolean;
+    pattern_name: string | null;
+    sms_kind: "received" | "transferred" | null;
+    amount: number | null;
+    occurred_at: ISODateString | null;
+    transaction_reference: string | null;
+    receipt_url: string | null;
+    service_fee: number | null;
+    vat_fee: number | null;
+    balance: number | null;
+    owner_name: string | null;
+    sender: {
+      name: string | null;
+      masked_account: string | null;
+    } | null;
+    receiver: {
+      name: string | null;
+      masked_account: string | null;
+    } | null;
+  };
+  flow_mapping: {
+    evidence_source: BankReferenceEvidenceSource;
+    inferred_transaction_type: "deposit" | "withdraw" | null;
+    agent_account: {
+      name: string | null;
+      masked_account: string | null;
+    } | null;
+    client_account: {
+      name: string | null;
+      masked_account: string | null;
+    } | null;
+    notes: string[];
+  };
+  sms_validation: {
+    provided_sender: string | null;
+    has_rules: boolean;
+    matches_sender: boolean | null;
+    accepted_senders: string[];
+    accepted_sender_regexes: string[];
+  };
+  receipt_lookup: {
+    enabled: boolean;
+    attempted: boolean;
+    successful: boolean | null;
+    url: string | null;
+    http_status: number | null;
+    matched_patterns: string[];
+    body_excerpt: string | null;
+    error_message: string | null;
+  };
+  errors: string[];
+}
+
 export interface PaymentSettingsResource {
   id: UUID;
   min_withdraw_allowed: number;
@@ -167,6 +245,7 @@ export interface AgentAccountResource {
   id: UUID;
   holder_name: string;
   account_number: string;
+  sim_number?: string | null;
   status: AgentAccountStatus;
   is_active: boolean;
   max_withdraw_per_day: number | null;
@@ -243,6 +322,24 @@ export interface UpdateApiKeyInput {
   expires_at?: string | null;
 }
 
+export interface StoreBankInput {
+  name: string;
+  code?: string;
+  is_available?: boolean;
+}
+
+export interface UpdateBankInput {
+  name?: string;
+  code?: string;
+  is_available?: boolean;
+}
+
+export interface BankReferencePlaygroundInput {
+  reference: string;
+  sms_sender?: string | null;
+  evidence_source?: BankReferenceEvidenceSource;
+}
+
 export interface StoreAgentInput {
   name: string;
   type: AgentType;
@@ -270,6 +367,9 @@ export interface StoreAgentAccountInput {
   bank_id: UUID;
   holder_name: string;
   account_number: string;
+  sim_number?: string | null;
+  device_metadata?: Record<string, unknown> | null;
+  internal_pin?: string | null;
   status?: AgentAccountStatus;
   max_withdraw_per_day?: number | null;
   max_withdraw_per_transaction?: number | null;
@@ -300,18 +400,6 @@ export interface StoreOrgInput {
   name: string;
   slug?: string;
   callback_url?: string | null;
-}
-
-export interface StoreBankInput {
-  name: string;
-  code: string;
-  is_available?: boolean;
-}
-
-export interface UpdateBankInput {
-  name?: string;
-  code?: string;
-  is_available?: boolean;
 }
 
 // ── Transaction Module (Phase 2) ──────────────────────────────────────────────

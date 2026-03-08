@@ -182,7 +182,7 @@ export function DataTable<T>({
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <DialogPanel className="relative w-full transform overflow-hidden rounded-t-2xl bg-background p-6 text-left shadow-xl transition-all sm:max-w-lg sm:rounded-2xl">
+                <DialogPanel className="relative w-full transform rounded-t-2xl bg-background p-6 text-left shadow-xl transition-all sm:max-w-lg sm:rounded-2xl">
                   <div className="flex items-center justify-between border-b border-border pb-4">
                     <DialogTitle as="h3" className="text-lg font-bold leading-6 text-foreground">
                       Row Details

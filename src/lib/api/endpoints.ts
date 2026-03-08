@@ -23,6 +23,7 @@ export const PAYMENT_ENDPOINTS = {
   SETTINGS: "/payment/settings",
   BANKS: "/payment/banks",
   BANK: (uuid: string) => `/payment/banks/${uuid}`,
+  BANK_PLAYGROUND_REFERENCE: (uuid: string) => `/payment/banks/${uuid}/playground/reference`,
   BANKS_AVAILABLE: "/payment/banks/available-for-org",
   AGENTS: "/payment/agents",
   AGENT: (uuid: string) => `/payment/agents/${uuid}`,

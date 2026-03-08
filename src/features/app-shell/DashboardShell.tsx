@@ -357,8 +357,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
           <nav className="flex min-w-0 flex-1 items-center justify-center gap-1">
             {resolvedNavItems.map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive = item.exact
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
               return (
                 <Link
@@ -441,7 +442,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         <nav className="flex-1 space-y-1.5 overflow-y-auto py-6">
           {resolvedNavItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
