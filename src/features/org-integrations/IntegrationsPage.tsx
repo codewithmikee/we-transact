@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
+import AppBadge from "@/components/ui/AppBadge";
 import AppDialog from "@/components/ui/AppDialog";
 import { DataTable, Column } from "@/components/data/DataTable";
 import { ActionMenu } from "@/components/data/ActionMenu";
@@ -34,9 +34,9 @@ const createSchema = z.object({
 type CreateForm = z.infer<typeof createSchema>;
 
 function ApiKeyStatusBadge({ apiKey }: { apiKey: ApiKeyResource }) {
-  if (apiKey.is_revoked) return <Badge variant="destructive">Revoked</Badge>;
-  if (apiKey.is_expired) return <Badge variant="warning">Expired</Badge>;
-  return <Badge variant="success">Active</Badge>;
+  if (apiKey.is_revoked) return <AppBadge status="error">Revoked</AppBadge>;
+  if (apiKey.is_expired) return <AppBadge status="warning">Expired</AppBadge>;
+  return <AppBadge status="success">Active</AppBadge>;
 }
 
 export default function IntegrationsPage() {

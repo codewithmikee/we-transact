@@ -19,13 +19,13 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
+import AppBadge from "@/components/ui/AppBadge";
 import AppDialog from "@/components/ui/AppDialog";
 import { Select } from "@/components/ui/Select";
 import { DataTable, Column } from "@/components/data/DataTable";
 import { ActionMenu } from "@/components/data/ActionMenu";
 import { ConfirmDialog } from "@/components/data/ConfirmDialog";
-import { StatusBadge, AvailabilityBadge, AccountStatusBadge } from "@/components/data/StatusBadge";
+import { StatusBadge, AvailabilityBadge, AccountStatusBadge } from "@/components/ui/AppBadge";
 import { CopyField } from "@/components/data/CopyButton";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -338,9 +338,9 @@ export default function AgentDetailPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Type</span>
-                <Badge variant={agent.type === "user" ? "info" : "secondary"}>
+                <AppBadge status={agent.type === "user" ? "info" : "default"}>
                   {agent.type}
-                </Badge>
+                </AppBadge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Login Code</span>

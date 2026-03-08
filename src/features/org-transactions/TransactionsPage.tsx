@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { RefreshCw, X } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -12,9 +13,10 @@ import {
   TransactionStatusBadge,
   TransactionTypeBadge,
   TransactionSourceBadge,
-} from "@/components/data/StatusBadge";
+} from "@/components/ui/AppBadge";
 import { TransactionListQuery, TransactionResource, TransactionStatus, TransactionType, TransactionSource } from "@/types/api.types";
 import { useTransactions } from "@/hooks/api/useTransactions";
+import { usePaymentAgents, useAgentAccounts } from "@/hooks/api/usePaymentAgents";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -74,11 +76,43 @@ function FilterSelect<T extends string>({
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function TransactionsPage() {
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<TransactionStatus | "">("");
   const [type, setType] = useState<TransactionType | "">("");
   const [source, setSource] = useState<TransactionSource | "">("");
+  const [agentId, setAgentId] = useState("");
+  const [agentAccountId, setAgentAccountId] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [dateField, setDateField] = useState<"requested_at" | "completed_at" | "">("");
+  const [timezone, setTimezone] = useState("UTC");
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") ?? "");
+    setStatus((searchParams.get("status") as TransactionStatus | "") ?? "");
+    setType((searchParams.get("type") as TransactionType | "") ?? "");
+    setSource((searchParams.get("source") as TransactionSource | "") ?? "");
+    setAgentId(searchParams.get("agent_id") ?? "");
+    setAgentAccountId(searchParams.get("agent_account_id") ?? "");
+    setDateFrom(searchParams.get("date_from") ?? "");
+    setDateTo(searchParams.get("date_to") ?? "");
+    setDateField((searchParams.get("date_field") as "requested_at" | "completed_at" | "") ?? "");
+    setTimezone(searchParams.get("timezone") ?? (Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"));
+    setPage(1);
+  }, [searchParams]);
+
+  const { data: agents } = usePaymentAgents({ per_page: 100 });
+  const { data: accounts } = useAgentAccounts(agentId, !!agentId);
+
+  useEffect(() => {
+    setAgentAccountId((currentValue) => {
+      if (!currentValue) return currentValue;
+      if (!agentId) return "";
+      return currentValue;
+    });
+  }, [agentId]);
 
   const params: TransactionListQuery = {
     page,
@@ -87,17 +121,33 @@ export default function TransactionsPage() {
     ...(status && { status }),
     ...(type && { type }),
     ...(source && { source }),
+    ...(agentId && { agent_id: agentId }),
+    ...(agentAccountId && { agent_account_id: agentAccountId }),
+    ...(dateFrom && dateTo && dateField
+      ? {
+          date_from: dateFrom,
+          date_to: dateTo,
+          date_field: dateField,
+          timezone,
+        }
+      : {}),
   };
 
   const { data, isLoading, isError, refetch } = useTransactions(params);
 
-  const hasFilters = !!(search || status || type || source);
+  const hasFilters = !!(search || status || type || source || agentId || agentAccountId || dateFrom || dateTo || dateField);
 
   const clearFilters = () => {
     setSearch("");
     setStatus("");
     setType("");
     setSource("");
+    setAgentId("");
+    setAgentAccountId("");
+    setDateFrom("");
+    setDateTo("");
+    setDateField("");
+    setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
     setPage(1);
   };
 
@@ -119,6 +169,7 @@ export default function TransactionsPage() {
     {
       key: "type",
       header: "Type / Source",
+      hideOnMobile: true,
       cell: (row) => (
         <div className="flex flex-col gap-1">
           <TransactionTypeBadge type={row.type} />
@@ -143,6 +194,7 @@ export default function TransactionsPage() {
     {
       key: "bank_agent",
       header: "Bank / Agent",
+      hideOnMobile: true,
       cell: (row) => (
         <div className="text-xs text-muted-foreground space-y-0.5">
           <p className="font-medium text-foreground">{row.bank?.name ?? "—"}</p>
@@ -153,6 +205,7 @@ export default function TransactionsPage() {
     {
       key: "date",
       header: "Requested",
+      hideOnMobile: true,
       cell: (row) =>
         row.requested_at ? (
           <span className="text-xs text-muted-foreground">
@@ -183,6 +236,68 @@ export default function TransactionsPage() {
         <FilterSelect value={type} onChange={(v) => { setType(v); setPage(1); }} options={TYPE_OPTIONS} />
         <FilterSelect value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={STATUS_OPTIONS} />
         <FilterSelect value={source} onChange={(v) => { setSource(v); setPage(1); }} options={SOURCE_OPTIONS} />
+        <select
+          value={agentId}
+          onChange={(e) => {
+            setAgentId(e.target.value);
+            setAgentAccountId("");
+            setPage(1);
+          }}
+          className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">All agents</option>
+          {agents?.data.map((agent) => (
+            <option key={agent.id} value={agent.id}>
+              {agent.name}
+            </option>
+          ))}
+        </select>
+        <select
+          value={agentAccountId}
+          onChange={(e) => {
+            setAgentAccountId(e.target.value);
+            setPage(1);
+          }}
+          disabled={!agentId}
+          className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <option value="">{agentId ? "All selected agent accounts" : "Select agent first"}</option>
+          {accounts?.data.map((account) => (
+            <option key={account.id} value={account.id}>
+              {account.holder_name} ({account.account_number})
+            </option>
+          ))}
+        </select>
+        <FilterSelect
+          value={dateField}
+          onChange={(value) => {
+            setDateField(value as "requested_at" | "completed_at" | "");
+            setPage(1);
+          }}
+          options={[
+            { value: "", label: "All dates" },
+            { value: "requested_at", label: "Requested date" },
+            { value: "completed_at", label: "Completed date" },
+          ]}
+        />
+        <input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => {
+            setDateFrom(e.target.value);
+            setPage(1);
+          }}
+          className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(e) => {
+            setDateTo(e.target.value);
+            setPage(1);
+          }}
+          className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
         {hasFilters && (
           <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1 text-muted-foreground">
             <X className="h-3.5 w-3.5" />

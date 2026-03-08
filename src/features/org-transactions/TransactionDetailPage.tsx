@@ -12,14 +12,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Badge } from "@/components/ui/Badge";
+import AppBadge from "@/components/ui/AppBadge";
 import AppDialog from "@/components/ui/AppDialog";
 import { ConfirmDialog } from "@/components/data/ConfirmDialog";
 import {
   TransactionStatusBadge,
   TransactionTypeBadge,
   TransactionSourceBadge,
-} from "@/components/data/StatusBadge";
+} from "@/components/ui/AppBadge";
 import {
   useTransaction,
   useTransactionEvents,
@@ -388,7 +388,7 @@ export default function TransactionDetailPage() {
                 <DetailRow
                   label="Agent"
                   value={transaction.agent?.name ?? (
-                    <Badge variant="secondary" className="text-xs">Unassigned</Badge>
+                    <AppBadge status="default"  className="text-xs">Unassigned</AppBadge>
                   )}
                 />
                 <DetailRow

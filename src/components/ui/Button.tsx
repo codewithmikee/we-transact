@@ -14,17 +14,17 @@ export interface ButtonProps extends Omit<HeadlessButtonProps, "children"> {
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", isLoading, children, disabled, ...props }, ref) => {
     const variants = {
-      primary: "bg-primary text-primary-foreground shadow-sm data-[hover]:bg-primary/90 data-[active]:bg-primary/80",
-      secondary: "bg-secondary text-secondary-foreground data-[hover]:bg-secondary/80 data-[active]:bg-secondary/70",
-      outline: "border border-border bg-background text-foreground shadow-sm data-[hover]:bg-accent data-[hover]:text-accent-foreground data-[active]:bg-accent/80",
-      ghost: "text-foreground data-[hover]:bg-accent data-[hover]:text-accent-foreground",
-      danger: "bg-destructive text-white data-[hover]:bg-destructive/90 data-[active]:bg-destructive/80",
+      primary: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all",
+      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98] transition-all",
+      outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:scale-[0.98] transition-all shadow-sm",
+      ghost: "hover:bg-accent hover:text-accent-foreground active:scale-[0.98] transition-all",
+      danger: "bg-destructive text-white hover:bg-destructive/90 active:scale-[0.98] transition-all shadow-sm",
     };
 
     const sizes = {
-      sm: "px-3 py-1.5 text-xs",
-      md: "px-4 py-2 text-sm",
-      lg: "px-6 py-3 text-base",
+      sm: "h-8 px-3 text-xs",
+      md: "h-10 px-4 py-2 text-sm",
+      lg: "h-12 px-8 text-base",
     };
 
     return (
@@ -32,7 +32,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={isLoading || disabled}
         className={cn(
-          "inline-flex items-center justify-center rounded-md font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "inline-flex items-center justify-center rounded-lg font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           variants[variant],
           sizes[size],
           className

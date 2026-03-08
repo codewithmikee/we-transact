@@ -15,7 +15,7 @@ import { ActionMenu } from "@/components/data/ActionMenu";
 import { ConfirmDialog } from "@/components/data/ConfirmDialog";
 import { SearchInput } from "@/components/data/SearchInput";
 import { PaginationBar } from "@/components/data/PaginationBar";
-import { StatusBadge } from "@/components/data/StatusBadge";
+import { StatusBadge } from "@/components/ui/AppBadge";
 import { useSessionStore } from "@/stores/session.store";
 import { OrgResource } from "@/types/api.types";
 import { useCreateOrg, useDeleteOrg, useOrgs, useUpdateOrgById } from "./api";

@@ -12,6 +12,8 @@ import {
   ReassignTransactionInput,
   RejectTransactionInput,
   TransactionEventResource,
+  TransactionAnalyticsSummary,
+  TransactionAnalyticsSummaryQuery,
   TransactionListQuery,
   TransactionResource,
 } from "@/types/api.types";
@@ -26,6 +28,19 @@ export function useTransactions(params?: TransactionListQuery) {
       apiClient
         .get<ApiPaginatedResponse<TransactionResource>>(TRANSACTION_ENDPOINTS.LIST, { params })
         .then((r) => r.data),
+  });
+}
+
+export function useTransactionAnalyticsSummary(params: TransactionAnalyticsSummaryQuery, enabled = true) {
+  return useApiQuery({
+    queryKey: ["transaction-analytics-summary", params],
+    queryFn: () =>
+      apiClient
+        .get<ApiSuccessResponse<TransactionAnalyticsSummary>>(TRANSACTION_ENDPOINTS.ANALYTICS_SUMMARY, {
+          params,
+        })
+        .then((r) => r.data.data),
+    enabled,
   });
 }
 

@@ -41,6 +41,7 @@ export const PLATFORM_ENDPOINTS = {
 
 export const TRANSACTION_ENDPOINTS = {
   LIST: "/transactions",
+  ANALYTICS_SUMMARY: "/transactions/analytics/summary",
   MANUAL: "/transactions/manual",
   BY_TRACKING: (code: string) => `/transactions/tracking/${code}`,
   DETAIL: (uuid: string) => `/transactions/${uuid}`,

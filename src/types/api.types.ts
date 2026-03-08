@@ -401,6 +401,45 @@ export interface TransactionListQuery extends PaginationQuery {
   client_phone_number?: string;
   bank_id?: string;
   agent_id?: string;
+  agent_account_id?: string;
+  date_from?: string;
+  date_to?: string;
+  date_field?: "requested_at" | "completed_at";
+  timezone?: string;
+}
+
+export interface TransactionAnalyticsSummaryQuery {
+  date_from: string;
+  date_to: string;
+  timezone?: string;
+  agent_id?: string;
+  agent_account_id?: string;
+}
+
+export interface TransactionAnalyticsSummary {
+  range: {
+    date_from: string;
+    date_to: string;
+    timezone: string;
+  };
+  scope: {
+    organization_id: UUID;
+    agent_id: UUID | null;
+    agent_account_id: UUID | null;
+  };
+  completed_summary: {
+    total_count: number;
+    deposit_count: number;
+    withdraw_count: number;
+    deposit_amount: string;
+    withdraw_amount: string;
+    total_amount: string;
+  };
+  requested_summary: {
+    total_count: number;
+    by_type: Record<TransactionType, number>;
+    by_status: Record<TransactionStatus, number>;
+  };
 }
 
 export interface ManualTransactionInput {

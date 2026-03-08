@@ -365,9 +365,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
                     isActive
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                   )}
                 >
@@ -387,8 +387,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="min-w-0">
             {isNestedMobileView ? (
               <div className="min-w-0">
-                <p className="truncate text-base font-semibold">{currentTitle}</p>
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="truncate text-base font-bold tracking-tight">{currentTitle}</p>
+                <p className="truncate text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80">
                   {shellKind === "org" ? orgLabel : roleLabel}
                 </p>
               </div>
@@ -401,7 +401,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <NotificationBell />
             <button
               type="button"
-              className="rounded-full border border-border bg-background p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground active:scale-95"
               onClick={() => setIsSidebarOpen((open) => !open)}
               aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
             >
@@ -413,7 +413,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <div
         className={cn(
-          "fixed inset-0 z-30 bg-black/30 transition-opacity md:hidden",
+          "fixed inset-0 z-30 bg-black/40 backdrop-blur-sm transition-opacity md:hidden",
           isSidebarOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={() => setIsSidebarOpen(false)}
@@ -421,21 +421,25 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-40 flex w-80 max-w-[calc(100vw-2rem)] flex-col border-l border-border bg-background px-5 py-5 transition-transform md:hidden",
+          "fixed inset-y-0 right-0 z-40 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-l border-border bg-background px-6 py-6 transition-transform duration-300 ease-in-out md:hidden",
           isSidebarOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <div className="border-b border-border pb-4">
+        <div className="border-b border-border pb-6">
           {profileSummary && (
-            <div className="space-y-1">
-              <p className="text-sm font-semibold">{profileSummary.name}</p>
-              <p className="text-xs text-muted-foreground">{profileSummary.username}</p>
-              <p className="text-xs text-muted-foreground">{profileSummary.role}</p>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                {profileSummary.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-foreground">{profileSummary.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{profileSummary.role}</p>
+              </div>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 space-y-2 overflow-y-auto py-5">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto py-6">
           {resolvedNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -444,23 +448,23 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors",
+                  "flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all",
                   isActive
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                 )}
               >
                 <span>{item.title}</span>
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className={cn("h-4 w-4 transition-transform", isActive && "rotate-90")} />
               </Link>
             );
           })}
         </nav>
 
-        <div className="space-y-2 border-t border-border pt-4">
+        <div className="space-y-1.5 border-t border-border pt-6">
           <Link
             href="/change-password"
-            className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-accent-foreground"
           >
             <KeyRound className="h-4 w-4" />
             Change Password
@@ -470,7 +474,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
+            className="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-destructive transition-all hover:bg-destructive/10 disabled:opacity-60"
           >
             <LogOut className="h-4 w-4" />
             {loggingOut ? "Signing out..." : "Logout"}
@@ -478,7 +482,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-5 md:px-6 md:py-6 lg:px-8">
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 md:px-6 md:py-10 lg:px-8">
         {children}
       </main>
     </div>

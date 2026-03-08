@@ -8,14 +8,14 @@ import { z } from "zod";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
+import AppBadge from "@/components/ui/AppBadge";
 import AppDialog from "@/components/ui/AppDialog";
 import { DataTable, Column } from "@/components/data/DataTable";
 import { ActionMenu } from "@/components/data/ActionMenu";
 import { ConfirmDialog } from "@/components/data/ConfirmDialog";
 import { SearchInput } from "@/components/data/SearchInput";
 import { PaginationBar } from "@/components/data/PaginationBar";
-import { StatusBadge } from "@/components/data/StatusBadge";
+import { StatusBadge } from "@/components/ui/AppBadge";
 import { UserResource } from "@/types/api.types";
 import {
   useCreateSystemAdmin,
@@ -99,9 +99,9 @@ export default function SystemUsersPage() {
       key: "role",
       header: "Role",
       cell: (row) => (
-        <Badge variant={row.role === "sy_super_admin" ? "info" : "secondary"}>
+        <AppBadge status={row.role === "sy_super_admin" ? "info" : "default"}>
           {ROLE_LABELS[row.role] ?? row.role}
-        </Badge>
+        </AppBadge>
       ),
     },
     {

@@ -16,7 +16,7 @@ import { z } from "zod";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
+import AppBadge from "@/components/ui/AppBadge";
 import AppDialog from "@/components/ui/AppDialog";
 import { Select } from "@/components/ui/Select";
 import { DataTable, Column } from "@/components/data/DataTable";
@@ -24,7 +24,7 @@ import { ActionMenu } from "@/components/data/ActionMenu";
 import { ConfirmDialog } from "@/components/data/ConfirmDialog";
 import { SearchInput } from "@/components/data/SearchInput";
 import { PaginationBar } from "@/components/data/PaginationBar";
-import { StatusBadge, AvailabilityBadge } from "@/components/data/StatusBadge";
+import { StatusBadge, AvailabilityBadge } from "@/components/ui/AppBadge";
 import { CopyField } from "@/components/data/CopyButton";
 import { PaymentAgentResource } from "@/types/api.types";
 import { selectUserRole, useSessionStore } from "@/stores/session.store";
@@ -186,9 +186,9 @@ export default function AgentsPage() {
         >
           <p className="font-medium text-foreground group-hover:text-primary transition-colors">{row.name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <Badge variant={row.type === "user" ? "info" : "secondary"} className="text-[10px] py-0">
+            <AppBadge status={row.type === "user" ? "info" : "default"} className="text-[10px] py-0">
               {row.type}
-            </Badge>
+            </AppBadge>
             <span className="font-mono text-xs text-muted-foreground">{row.login_code}</span>
           </div>
         </Link>
