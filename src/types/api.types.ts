@@ -608,3 +608,106 @@ export interface PlatformWithdrawInput {
     account_alias?: string;
   };
 }
+
+// ── Bank Transaction Resolution Tool ──────────────────────────────────────────
+
+export type BankTransactionReferencePattern = "sms" | "url" | "direct";
+
+export type BankTransactionConfirmationStatusValue =
+  | "valid"
+  | "invalid"
+  | "unresponsive"
+  | "mismatch";
+
+export interface BankTransactionToolBankResource {
+  bank_code: string;
+  name: string;
+  capabilities: string[];
+}
+
+export interface BankTransactionParticipant {
+  name: string | null;
+  account_number: string | null;
+}
+
+export interface BankTransactionData {
+  amount: number | null;
+  sender: BankTransactionParticipant | null;
+  receiver: BankTransactionParticipant | null;
+  direction: "sender_to_receiver" | null;
+  external_transaction_reference: string | null;
+  occurred_at: ISODateString | null;
+  status: string | null;
+  service_fee: number | null;
+  vat_fee: number | null;
+  total_paid_amount: number | null;
+  balance: number | null;
+  receipt_url: string | null;
+  payment_mode: string | null;
+  payment_reason: string | null;
+  payment_channel: string | null;
+  customer_note: string | null;
+}
+
+export interface ExtractBankTransactionReferenceResult {
+  bank_code: string;
+  is_valid: boolean;
+  pattern: BankTransactionReferencePattern | null;
+  external_transaction_reference: string | null;
+  bank_link: string | null;
+  errors: string[];
+}
+
+export interface ParseBankTransactionSmsResult {
+  bank_code: string;
+  is_valid: boolean;
+  errors: string[];
+  data: BankTransactionData;
+}
+
+export interface ResolveBankTransactionResult {
+  bank_code: string;
+  reference: ExtractBankTransactionReferenceResult;
+  bank_confirmation_status: BankTransactionConfirmationStatusValue;
+  http_status: number | null;
+  raw_excerpt: string | null;
+  errors: string[];
+  data: BankTransactionData | null;
+}
+
+export interface ValidationCheckResultResource {
+  matched: boolean;
+  expected: unknown;
+  actual: unknown;
+}
+
+export interface ValidateBankTransactionSmsResult {
+  bank_code: string;
+  bank_confirmation_status: BankTransactionConfirmationStatusValue;
+  errors: string[];
+  parsed_sms: BankTransactionData;
+  checks: {
+    amount: ValidationCheckResultResource;
+    sender_name: ValidationCheckResultResource;
+    sender_account_number: ValidationCheckResultResource;
+    receiver_name: ValidationCheckResultResource;
+    receiver_account_number: ValidationCheckResultResource;
+    direction: ValidationCheckResultResource;
+  };
+}
+
+export interface ValidateBankTransactionResult {
+  bank_code: string;
+  bank_confirmation_status: BankTransactionConfirmationStatusValue;
+  errors: string[];
+  reference: ExtractBankTransactionReferenceResult;
+  resolved_bank_transaction: BankTransactionData | null;
+  checks: {
+    amount: ValidationCheckResultResource;
+    sender_name: ValidationCheckResultResource;
+    sender_account_number: ValidationCheckResultResource;
+    receiver_name: ValidationCheckResultResource;
+    receiver_account_number: ValidationCheckResultResource;
+    direction: ValidationCheckResultResource;
+  };
+}

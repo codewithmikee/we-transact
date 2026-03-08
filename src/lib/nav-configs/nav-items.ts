@@ -62,5 +62,10 @@ export const SYSTEM_ADMIN_NAV_ITEMS: NavItemContent[] = [
         link: '/system/banks',
         title: "Banks",
         icon: 'Banknote',
+    },
+    {
+        link: '/system/tools/bank-transactions',
+        title: "Bank Resolution",
+        icon: 'Wrench',
     }
 ]

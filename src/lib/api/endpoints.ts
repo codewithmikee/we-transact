@@ -52,3 +52,14 @@ export const TRANSACTION_ENDPOINTS = {
   REJECT: (uuid: string) => `/transactions/${uuid}/reject`,
   COMPLETE: (uuid: string) => `/transactions/${uuid}/complete`,
 } as const;
+
+export const TOOL_ENDPOINTS = {
+  BANK_TRANSACTIONS: {
+    BANKS: "/tools/bank-transactions/banks",
+    EXTRACT_REFERENCE: "/tools/bank-transactions/extract-reference",
+    PARSE_SMS: "/tools/bank-transactions/parse-sms",
+    RESOLVE_BANK: "/tools/bank-transactions/resolve-bank",
+    VALIDATE_SMS: "/tools/bank-transactions/validate-sms",
+    VALIDATE_BANK: "/tools/bank-transactions/validate-bank",
+  },
+} as const;
