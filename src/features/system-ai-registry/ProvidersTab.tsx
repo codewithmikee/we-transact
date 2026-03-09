@@ -28,7 +28,7 @@ const providerSchema = z.object({
   slug: z.string().min(2, "Slug is required"),
   driver: z.enum(["openai", "openai_compatible", "anthropic", "gemini", "openrouter"]),
   base_url: z.string().url("Invalid URL").nullable().or(z.literal("")),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 });
 
 type ProviderForm = z.infer<typeof providerSchema>;

@@ -30,7 +30,7 @@ const modelSchema = z.object({
   display_name: z.string().min(1, "Display name is required"),
   input_price_per_million: z.coerce.number().min(0),
   output_price_per_million: z.coerce.number().min(0),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 });
 
 type ModelForm = z.infer<typeof modelSchema>;

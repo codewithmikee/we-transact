@@ -12,8 +12,7 @@ import AppDialog from "@/components/ui/AppDialog";
 import { Toggle } from "@/components/ui/Toggle";
 import { DataTable, Column } from "@/components/data/DataTable";
 import { ActionMenu } from "@/components/data/ActionMenu";
-import { ConfirmDialog } from "@/components/data/ConfirmDialog";
-import { AppBadge } from "@/components/ui/AppBadge";
+import { ConfirmDialog } from "@/components/data/ConfirmDialog"; 
 import { AgentAiConfiguration, AiModelResource, AiCredentialResource } from "@/types/api.types";
 import {
   useAgentAiConfigs,
@@ -22,12 +21,13 @@ import {
   useDeleteAgentAiConfig,
 } from "@/hooks/api/useAgentAiConfigs";
 import { useAiModels, useAiCredentials } from "@/hooks/api/useAiRegistry";
+import AppBadge from "@/components/ui/AppBadge";
 
 const configSchema = z.object({
   model_id: z.string().uuid("Please select a model"),
   credential_id: z.string().uuid("Please select a credential"),
   priority: z.coerce.number().min(1, "Priority must be at least 1"),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 });
 
 type ConfigForm = z.infer<typeof configSchema>;
@@ -148,9 +148,9 @@ export function AgentAiConfigSection({ agentId, organizationUuid }: { agentId: s
       cell: (row) => (
         <div className="flex items-center gap-2">
           {row.is_usable ? (
-            <AppBadge variant="success">Usable</AppBadge>
+            <AppBadge status="success">Usable</AppBadge>
           ) : (
-            <AppBadge variant="destructive">Broken</AppBadge>
+            <AppBadge status="error">Broken</AppBadge>
           )}
         </div>
       ),

@@ -14,7 +14,7 @@ import { ActionMenu } from "@/components/data/ActionMenu";
 import { ConfirmDialog } from "@/components/data/ConfirmDialog";
 import { SearchInput } from "@/components/data/SearchInput";
 import { PaginationBar } from "@/components/data/PaginationBar";
-import { AppBadge } from "@/components/ui/AppBadge";
+import AppBadge from "@/components/ui/AppBadge";
 import { AiCredentialResource } from "@/types/api.types";
 import {
   useAiCredentials,
@@ -127,9 +127,9 @@ export function CredentialsTab() {
       header: "Status",
       cell: (row) => (
         row.is_revoked ? (
-          <AppBadge variant="destructive">Revoked</AppBadge>
+          <AppBadge status="error">Revoked</AppBadge>
         ) : (
-          <AppBadge variant="success">Active</AppBadge>
+          <AppBadge status="success">Active</AppBadge>
         )
       ),
     },
