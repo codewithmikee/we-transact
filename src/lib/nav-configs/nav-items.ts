@@ -64,6 +64,11 @@ export const SYSTEM_ADMIN_NAV_ITEMS: NavItemContent[] = [
         icon: 'Banknote',
     },
     {
+        link: '/system/ai-registry',
+        title: "AI Registry",
+        icon: 'Bot',
+    },
+    {
         link: '/system/tools/bank-transactions',
         title: "Bank Resolution",
         icon: 'Wrench',

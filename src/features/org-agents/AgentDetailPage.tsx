@@ -30,6 +30,8 @@ import { CopyField } from "@/components/data/CopyButton";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AgentAccountResource, PaymentAgentResource } from "@/types/api.types";
+import { useSessionStore } from "@/stores/session.store";
+import { AgentAiConfigSection } from "@/features/system-ai-configs/AgentAiConfigSection";
 import {
   useAgentAccounts,
   useAvailableBanks,
@@ -253,6 +255,10 @@ export default function AgentDetailPage() {
   const router = useRouter();
 
   const { data: agent, isPending, isError } = usePaymentAgent(agentId);
+  const user = useSessionStore((s) => s.user);
+  const activeOrgUuid = useSessionStore((s) => s.activeOrgUuid);
+  const isSystemAdmin = user?.role === "sy_super_admin" || user?.role === "sy_admin";
+
   const updateMutation = useUpdatePaymentAgent();
   const connectCodeMutation = useGenerateConnectCode();
   const [connectCodeAgent, setConnectCodeAgent] = useState<PaymentAgentResource | null>(null);
@@ -398,12 +404,23 @@ export default function AgentDetailPage() {
         </div>
 
         {/* Right: Accounts Section */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardContent className="pt-6">
               <AgentAccountsSection agentUuid={agent.id} />
             </CardContent>
           </Card>
+
+          {isSystemAdmin && agent.type === "device" && (
+            <Card>
+              <CardContent className="pt-6">
+                <AgentAiConfigSection 
+                  agentId={agent.id} 
+                  organizationUuid={activeOrgUuid ?? undefined} 
+                />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 

@@ -711,3 +711,191 @@ export interface ValidateBankTransactionResult {
     direction: ValidationCheckResultResource;
   };
 }
+
+// ── AI Registry Module ────────────────────────────────────────────────────────
+
+export type AiProviderDriver =
+  | "openai"
+  | "openai_compatible"
+  | "anthropic"
+  | "gemini"
+  | "openrouter";
+
+export interface AiProviderResource {
+  id: UUID;
+  slug: string;
+  name: string;
+  driver: AiProviderDriver;
+  base_url: string | null;
+  is_active: boolean;
+  created_at: ISODateString | null;
+  updated_at: ISODateString | null;
+}
+
+export interface AiModelResource {
+  id: UUID;
+  provider_id: UUID | null;
+  model_key: string;
+  display_name: string;
+  input_price_per_million: string;
+  output_price_per_million: string;
+  is_active: boolean;
+  provider?: {
+    id: UUID;
+    slug: string;
+    name: string;
+    driver: AiProviderDriver;
+  };
+  created_at: ISODateString | null;
+  updated_at: ISODateString | null;
+}
+
+export interface AiCredentialResource {
+  id: UUID;
+  provider_id: UUID | null;
+  name: string;
+  api_key_masked: string;
+  is_revoked: boolean;
+  revoked_at: ISODateString | null;
+  provider?: {
+    id: UUID;
+    slug: string;
+    name: string;
+    driver: AiProviderDriver;
+  };
+  created_at: ISODateString | null;
+  updated_at: ISODateString | null;
+}
+
+export interface AiCredentialTestResult {
+  success: boolean;
+  response_code: number | null;
+  message: string;
+  checked_at: ISODateString;
+  credential_id: UUID;
+  provider: {
+    id: UUID | null;
+    slug: string | null;
+    driver: AiProviderDriver | string;
+  };
+}
+
+export interface StoreAiProviderInput {
+  name: string;
+  slug: string;
+  driver: AiProviderDriver;
+  base_url?: string | null;
+  is_active?: boolean;
+}
+
+export type UpdateAiProviderInput = Partial<StoreAiProviderInput>;
+
+export interface StoreAiModelInput {
+  provider_id: UUID;
+  model_key: string;
+  display_name: string;
+  input_price_per_million: number | string;
+  output_price_per_million: number | string;
+  is_active?: boolean;
+}
+
+export type UpdateAiModelInput = Partial<StoreAiModelInput>;
+
+export interface StoreAiCredentialInput {
+  provider_id: UUID;
+  name: string;
+  api_key: string;
+}
+
+export interface UpdateAiCredentialInput {
+  provider_id?: UUID;
+  name?: string;
+  api_key?: string;
+}
+
+export interface AiProviderListQuery extends PaginationQuery {
+  driver?: AiProviderDriver;
+  is_active?: boolean;
+}
+
+export interface AiModelListQuery extends PaginationQuery {
+  provider_id?: UUID;
+  is_active?: boolean;
+}
+
+export interface AiCredentialListQuery extends PaginationQuery {
+  provider_id?: UUID;
+  is_revoked?: boolean;
+}
+
+// ── Agent AI Configuration Module ─────────────────────────────────────────────
+
+export interface AgentAiConfiguration {
+  id: UUID;
+  agent_id: UUID | null;
+  priority: number;
+  is_active: boolean;
+  is_usable: boolean;
+  provider?: {
+    id: UUID;
+    slug: string;
+    name: string;
+    driver: AiProviderDriver;
+    base_url: string | null;
+    is_active: boolean;
+  };
+  model?: {
+    id: UUID;
+    model_key: string;
+    display_name: string;
+    input_price_per_million: string;
+    output_price_per_million: string;
+    is_active: boolean;
+  };
+  credential?: {
+    id: UUID;
+    name: string;
+    api_key_masked: string;
+    is_revoked: boolean;
+  };
+  created_at: ISODateString | null;
+  updated_at: ISODateString | null;
+}
+
+export interface StoreAgentAiConfigurationInput {
+  model_id: UUID;
+  credential_id: UUID;
+  priority: number;
+  is_active?: boolean;
+}
+
+export type UpdateAgentAiConfigurationInput = Partial<StoreAgentAiConfigurationInput>;
+
+export interface AgentAiConfigurationListQuery extends PaginationQuery {
+  organization_uuid?: UUID;
+  is_active?: boolean;
+}
+
+export interface ResolvedAgentAiConfiguration {
+  id: UUID;
+  priority: number;
+  provider?: {
+    id: UUID;
+    slug: string;
+    name: string;
+    driver: AiProviderDriver;
+    base_url: string | null;
+  };
+  model: {
+    id: UUID | null;
+    model_key: string | null;
+    display_name: string | null;
+    input_price_per_million: string | null;
+    output_price_per_million: string | null;
+  };
+  credential: {
+    id: UUID | null;
+    name: string | null;
+    api_key: string | null;
+  };
+}

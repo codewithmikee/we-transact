@@ -63,3 +63,19 @@ export const TOOL_ENDPOINTS = {
     VALIDATE_BANK: "/tools/bank-transactions/validate-bank",
   },
 } as const;
+
+export const AI_REGISTRY_ENDPOINTS = {
+  PROVIDERS: "/ai-registry/providers",
+  PROVIDER: (uuid: string) => `/ai-registry/providers/${uuid}`,
+  MODELS: "/ai-registry/models",
+  MODEL: (uuid: string) => `/ai-registry/models/${uuid}`,
+  CREDENTIALS: "/ai-registry/credentials",
+  CREDENTIAL: (uuid: string) => `/ai-registry/credentials/${uuid}`,
+  TEST_CREDENTIAL: (uuid: string) => `/ai-registry/credentials/${uuid}/test`,
+} as const;
+
+export const AGENT_AI_CONFIG_ENDPOINTS = {
+  LIST: (agentId: string) => `/payment/agents/${agentId}/ai-configurations`,
+  DETAIL: (agentId: string, configId: string) => `/payment/agents/${agentId}/ai-configurations/${configId}`,
+  RUNTIME: "/agent/ai-configurations",
+} as const;
