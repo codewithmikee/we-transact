@@ -86,7 +86,7 @@ export function useTransactionWebsocket({
         params: {
           organization_uuid: organizationUuid ?? undefined,
         },
-      },
+      } as any,
     });
 
     const subscriptions = channels.map((name) => {
@@ -100,11 +100,13 @@ export function useTransactionWebsocket({
 
       queryClient.setQueryData(["transaction", transaction.id], transaction);
 
-      queryClient.getQueryCache().findAll((query) => {
-        const key = query.queryKey;
-        return Array.isArray(key) && key[0] === "transactions";
+      queryClient.getQueryCache().findAll({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return Array.isArray(key) && key[0] === "transactions";
+        }
       }).forEach(({ queryKey }) => {
-        queryClient.setQueryData(queryKey, (prev) => {
+        queryClient.setQueryData(queryKey, (prev: { data: TransactionResource[]; meta?: { per_page: number } } | undefined) => {
           if (!prev || !Array.isArray(prev.data)) return prev;
 
           const existingIndex = prev.data.findIndex((row) => row.id === transaction.id);
@@ -122,7 +124,7 @@ export function useTransactionWebsocket({
         });
       });
 
-      queryClient.setQueryData(["transaction-events", transaction.id], (prev) => {
+      queryClient.setQueryData(["transaction-events", transaction.id], (prev: { data: TransactionEventResource[]; meta?: { per_page: number } } | undefined) => {
         if (!prev || !Array.isArray(prev.data)) return prev;
 
         const existing = prev.data.filter((entry) => entry.id !== event.id);
