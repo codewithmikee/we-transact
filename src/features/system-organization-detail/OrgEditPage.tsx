@@ -8,8 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -21,9 +22,23 @@ const schema = z.object({
   slug: z.string().min(2, "Slug is required"),
   is_active: z.boolean(),
   callback_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  ai_registery_project_id: z
+    .string()
+    .max(255, "Project ID cannot exceed 255 characters")
+    .optional()
+    .or(z.literal("")),
+  ai_registery_project_api_key: z
+    .string()
+    .max(2048, "Project API key cannot exceed 2048 characters")
+    .optional()
+    .or(z.literal("")),
 });
 
 type OrgEditForm = z.infer<typeof schema>;
+
+const optionalTextToNullable = (value?: string | null): string | null => {
+  return value === undefined || value === null || value === "" ? null : value;
+};
 
 // We look up the org from the list data by slug — the API detail endpoint uses UUID.
 // Since this page uses slug from the URL, we first need to find the org's UUID.
@@ -56,6 +71,8 @@ export default function OrgEditPage() {
       slug: "",
       is_active: true,
       callback_url: "",
+      ai_registery_project_id: "",
+      ai_registery_project_api_key: "",
     },
   });
   const isActive = useWatch({ control, name: "is_active" });
@@ -67,6 +84,8 @@ export default function OrgEditPage() {
         slug: currentOrg.slug,
         is_active: currentOrg.is_active,
         callback_url: currentOrg.callback_url ?? "",
+        ai_registery_project_id: currentOrg.ai_registery_project_id ?? "",
+        ai_registery_project_api_key: currentOrg.ai_registery_project_api_key ?? "",
       });
     }
   }, [currentOrg, reset]);
@@ -80,6 +99,8 @@ export default function OrgEditPage() {
         slug: values.slug,
         is_active: values.is_active,
         callback_url: values.callback_url || null,
+        ai_registery_project_id: optionalTextToNullable(values.ai_registery_project_id),
+        ai_registery_project_api_key: optionalTextToNullable(values.ai_registery_project_api_key),
       },
     });
     // If slug changed, navigate to new slug
@@ -161,6 +182,29 @@ export default function OrgEditPage() {
                     onChange={(v) => setValue("is_active", v, { shouldDirty: true })}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="space-y-1">
+                <CardTitle>AI Registry</CardTitle>
+                <CardDescription>
+                  Link this organization to an AI Registry project. Only system administrators can view or edit this data.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  label="AI Registery Project ID"
+                  error={errors.ai_registery_project_id?.message}
+                  {...register("ai_registery_project_id")}
+                />
+                <Textarea
+                  label="AI Registery Project API Key"
+                  error={errors.ai_registery_project_api_key?.message}
+                  placeholder="Paste the API key or leave blank to clear"
+                  {...register("ai_registery_project_api_key")}
+                  rows={3}
+                />
               </CardContent>
             </Card>
 

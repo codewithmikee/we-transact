@@ -27,6 +27,7 @@ import {
 } from "@/lib/nav-configs/nav-items";
 import { logoutApi } from "@/lib/api/auth";
 import { useSessionStore } from "@/stores/session.store";
+import { useTransactionWebsocket } from "@/hooks/useTransactionWebsocket";
 import { NavConfig, NavItemContent } from "@/types/nav.types";
 import { UserRole } from "@/types/api.types";
 
@@ -280,9 +281,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const role = useSessionStore((state) => state.user?.role ?? null);
   const user = useSessionStore((state) => state.user);
   const accessToken = useSessionStore((state) => state.accessToken);
+  const activeOrgUuid = useSessionStore((state) => state.activeOrgUuid);
   const activeOrgName = useSessionStore((state) => state.activeOrgName);
   const clearSession = useSessionStore((state) => state.clearSession);
   const router = useRouter();
+
+  useTransactionWebsocket({
+    enabled: Boolean(accessToken && activeOrgUuid),
+    channels: activeOrgUuid ? [`organization.${activeOrgUuid}`] : [],
+    sessionToken: accessToken,
+    organizationUuid: activeOrgUuid ?? undefined,
+  });
 
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [loggingOut, setLoggingOut] = React.useState(false);

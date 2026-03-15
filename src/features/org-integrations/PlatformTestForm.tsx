@@ -38,7 +38,7 @@ function err(msg: string | undefined) {
 
 interface Props {
   apiKeyName: string;
-  /** Full plain_key (format: org_{key_id}.{secret}) stored in session after create/rotate */
+  /** Value sent as X-API-KEY header for platform routes */
   plainKey: string;
   onSuccess: (tx: TransactionResource) => void;
   onCancel: () => void;

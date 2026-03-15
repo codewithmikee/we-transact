@@ -49,9 +49,6 @@ export default function IntegrationsPage() {
   const [rotateTarget, setRotateTarget] = useState<ApiKeyResource | null>(null);
   const [testTarget, setTestTarget] = useState<ApiKeyResource | null>(null);
 
-  // Track plain keys in session memory — cleared on page reload (intentional: security)
-  const [keySecrets, setKeySecrets] = useState<Record<string, string>>({});
-
   const { data, isLoading, isError, refetch } = useApiKeys({ page, per_page: 15, search });
   const createMutation = useCreateApiKey();
   const updateMutation = useUpdateApiKey();
@@ -69,9 +66,6 @@ export default function IntegrationsPage() {
       name: values.name,
       expires_at: values.expires_at || null,
     });
-    if (key.plain_key) {
-      setKeySecrets((prev) => ({ ...prev, [key.id]: key.plain_key! }));
-    }
     setCreatedKey(key);
     setShowCreate(false);
     reset();
@@ -83,9 +77,6 @@ export default function IntegrationsPage() {
       uuid: rotateTarget.id,
       data: { rotate: true },
     });
-    if (key.plain_key) {
-      setKeySecrets((prev) => ({ ...prev, [key.id]: key.plain_key! }));
-    }
     setCreatedKey(key);
     setRotateTarget(null);
   };
@@ -262,11 +253,9 @@ export default function IntegrationsPage() {
       >
         <div className="space-y-4">
           <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-sm text-amber-600 dark:text-amber-400">
-            Copy this key now — it will not be shown again.
+            Use this API Key value in your platform integration header as <strong>X-API-KEY</strong>.
           </div>
-          {createdKey?.plain_key && (
-            <CopyField value={createdKey.plain_key} label="Secret Key" />
-          )}
+          {createdKey && <CopyField value={createdKey.key_id} label="API Key" />}
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"
@@ -292,36 +281,14 @@ export default function IntegrationsPage() {
         title="Test Integration"
         maxWidth="lg"
       >
-        {testTarget && (
-          keySecrets[testTarget.id] ? (
-            <PlatformTestForm
-              apiKeyName={testTarget.name}
-              plainKey={keySecrets[testTarget.id]}
-              onSuccess={handleTestSuccess}
-              onCancel={() => setTestTarget(null)}
-            />
-          ) : (
-            <div className="space-y-4">
-              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-4 py-3 text-sm text-amber-600 dark:text-amber-400">
-                <p className="font-semibold mb-1">Secret not available</p>
-                <p>
-                  The full API secret for <strong>{testTarget.name}</strong> is only shown once
-                  after creation or rotation. To test this key, rotate it first to reveal a new secret.
-                </p>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setTestTarget(null)}>Close</Button>
-                <Button
-                  variant="primary"
-                  onClick={() => { setRotateTarget(testTarget); setTestTarget(null); }}
-                >
-                  <RotateCw className="h-4 w-4 mr-2" />
-                  Rotate Key
-                </Button>
-              </div>
-            </div>
-          )
-        )}
+        {testTarget ? (
+          <PlatformTestForm
+            apiKeyName={testTarget.name}
+            plainKey={testTarget.key_id}
+            onSuccess={handleTestSuccess}
+            onCancel={() => setTestTarget(null)}
+          />
+        ) : null}
       </AppDialog>
 
       {/* Rotate Confirm */}

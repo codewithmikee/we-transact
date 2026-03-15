@@ -12,9 +12,14 @@ export interface SelectOption {
   name?: string;
 }
 
+interface NormalizedOption {
+  value: string | number;
+  label: string;
+}
+
 interface SelectProps {
   label?: string;
-  value: any; // Can be string, number, or object
+  value: string | number | SelectOption | null | undefined;
   onChange: (value: any) => void;
   options: SelectOption[];
   className?: string;
@@ -34,17 +39,17 @@ export function Select({
   placeholder = "Select an option",
 }: SelectProps) {
   // Helper to normalize options
-  const normalizedOptions = React.useMemo(() => options.map(opt => ({
+  const normalizedOptions = React.useMemo<NormalizedOption[]>(() => options.map(opt => ({
     value: opt.value ?? opt.id ?? "",
     label: opt.label ?? opt.name ?? "",
   })), [options]);
 
   // Helper to find the current selected option object for display
-  const selectedOption = React.useMemo(() => {
+  const selectedOption = React.useMemo<NormalizedOption | undefined>(() => {
     if (value === undefined || value === null || value === "") return undefined;
     
     if (typeof value === 'object') {
-      const val = value.value ?? value.id;
+      const val = value.value ?? value.id ?? "";
       return normalizedOptions.find(opt => opt.value === val) || { 
         value: val, 
         label: value.label ?? value.name ?? String(val) 
@@ -55,7 +60,7 @@ export function Select({
 
   const displayLabel = selectedOption ? selectedOption.label : placeholder;
 
-  const handleChange = (val: { value: string | number; label: string }) => {
+  const handleChange = (val: NormalizedOption) => {
     // If original value was an object style, return the matching original option object
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       const originalOption = options.find(opt => (opt.value ?? opt.id) === val.value);

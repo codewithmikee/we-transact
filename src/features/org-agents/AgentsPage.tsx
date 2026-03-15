@@ -26,7 +26,7 @@ import { SearchInput } from "@/components/data/SearchInput";
 import { PaginationBar } from "@/components/data/PaginationBar";
 import { StatusBadge, AvailabilityBadge } from "@/components/ui/AppBadge";
 import { CopyField } from "@/components/data/CopyButton";
-import { PaymentAgentResource } from "@/types/api.types";
+import { AgentAutomationMode, AgentType, PaymentAgentResource } from "@/types/api.types";
 import { selectUserRole, useSessionStore } from "@/stores/session.store";
 import {
   useCreatePaymentAgent,
@@ -39,15 +39,32 @@ import {
 
 // ── Schemas ────────────────────────────────────────────────────────────────────
 
-const agentTypeOptions = [
-  { id: "user", name: "User Agent" },
-  { id: "device", name: "Device Agent" },
+type AgentCreationMode = "user" | AgentAutomationMode;
+
+type AgentModeOption = {
+  id: AgentCreationMode;
+  name: string;
+  type: AgentType;
+  automationMode: AgentAutomationMode | null;
+};
+
+const agentModeOptions: AgentModeOption[] = [
+  { id: "user", name: "User Agent", type: "user", automationMode: null },
+  { id: "full_automated", name: "Fully Automated", type: "device", automationMode: "full_automated" },
+  { id: "sim_automated", name: "SIM Automated", type: "device", automationMode: "sim_automated" },
 ];
+
+const getAgentDisplayLabel = (type: AgentType, automationMode?: AgentAutomationMode | null): string => {
+  if (type === "user") return "User Agent";
+  if (automationMode === "full_automated") return "Fully Automated";
+  if (automationMode === "sim_automated") return "SIM Automated";
+  return "Device Agent";
+};
 
 const createAgentSchema = z
   .object({
+    agent_mode: z.enum(["user", "full_automated", "sim_automated"]),
     name: z.string().min(2, "Name is required"),
-    type: z.enum(["user", "device"]),
     phone_number: z.string().optional(),
     user_name: z.string().optional(),
     password: z.string().optional(),
@@ -56,21 +73,21 @@ const createAgentSchema = z
   })
   .refine(
     (d) => {
-      if (d.type === "user") return !!d.user_name;
+      if (d.agent_mode === "user") return !!d.user_name;
       return true;
     },
     { message: "Username is required for user agents", path: ["user_name"] },
   )
   .refine(
     (d) => {
-      if (d.type === "user") return !!d.password && d.password.length >= 8;
+      if (d.agent_mode === "user") return !!d.password && d.password.length >= 8;
       return true;
     },
     { message: "Password must be at least 8 characters", path: ["password"] },
   )
   .refine(
     (d) => {
-      if (d.type === "user") return d.password === d.password_confirmation;
+      if (d.agent_mode === "user") return d.password === d.password_confirmation;
       return true;
     },
     { message: "Passwords do not match", path: ["password_confirmation"] },
@@ -112,7 +129,7 @@ export default function AgentsPage() {
   const canResetPasswords = userRole === "sy_super_admin" || userRole === "org_super_admin";
  
 
-  const [agentType, setAgentType] = useState<{ id: string; name: string }>(agentTypeOptions[0]);
+  const [agentMode, setAgentMode] = useState<AgentModeOption>(agentModeOptions[0]);
 
   const {
     register,
@@ -122,7 +139,7 @@ export default function AgentsPage() {
     formState: { errors },
   } = useForm<CreateAgentForm>({
     resolver: zodResolver(createAgentSchema),
-    defaultValues: { type: "user" },
+    defaultValues: { agent_mode: agentModeOptions[0].id },
   });
 
   const {
@@ -135,10 +152,19 @@ export default function AgentsPage() {
   });
 
   const handleCreate = handleSubmit(async (values) => {
-    await createMutation.mutateAsync(values);
+    await createMutation.mutateAsync({
+      name: values.name,
+      type: agentMode.type,
+      automation_mode: agentMode.automationMode ?? undefined,
+      phone_number: values.phone_number || undefined,
+      user_name: values.user_name,
+      password: values.password,
+      password_confirmation: values.password_confirmation,
+      device_name: agentMode.type === "device" ? values.device_name || undefined : undefined,
+    });
     setShowCreate(false);
     reset();
-    setAgentType(agentTypeOptions[0]);
+    setAgentMode(agentModeOptions[0]);
   });
 
   const handleDelete = async () => {
@@ -187,7 +213,7 @@ export default function AgentsPage() {
           <p className="font-medium text-foreground group-hover:text-primary transition-colors">{row.name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <AppBadge status={row.type === "user" ? "info" : "default"} className="text-[10px] py-0">
-              {row.type}
+              {getAgentDisplayLabel(row.type, row.automation_mode ?? null)}
             </AppBadge>
             <span className="font-mono text-xs text-muted-foreground">{row.login_code}</span>
           </div>
@@ -303,30 +329,32 @@ export default function AgentsPage() {
       {/* Create Agent Modal */}
       <AppDialog
         open={showCreate}
-        onClose={() => { setShowCreate(false); reset(); setAgentType(agentTypeOptions[0]); }}
+        onClose={() => { setShowCreate(false); reset(); setAgentMode(agentModeOptions[0]); }}
         title="Add Agent"
         maxWidth="md"
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <Controller
             control={control}
-            name="type"
+            name="agent_mode"
             render={({ field }) => (
               <Select
                 label="Agent Type"
-                options={agentTypeOptions}
-                value={agentTypeOptions.find((o) => o.id === field.value) ?? agentTypeOptions[0]}
+                options={agentModeOptions}
+                value={agentModeOptions.find((o) => o.id === field.value) ?? agentModeOptions[0]}
                 onChange={(opt) => {
-                  field.onChange(opt.id);
-                  setAgentType({ id: String(opt.id), name: opt.name });
+                  const selected = agentModeOptions.find((entry) => entry.id === opt.id) ?? agentModeOptions[0];
+                  field.onChange(selected.id);
+                  setAgentMode(selected);
                 }}
+                error={errors.agent_mode?.message}
               />
             )}
           />
 
           <Input label="Agent Name" error={errors.name?.message} {...register("name")} />
 
-          {agentType.id === "user" && (
+          {agentMode.id === "user" && (
             <>
               <Input
                 label="Username"
@@ -356,7 +384,7 @@ export default function AgentsPage() {
             </>
           )}
 
-          {agentType.id === "device" && (
+          {agentMode.type === "device" && (
             <Input
               label="Device Name"
               error={errors.device_name?.message}
@@ -368,7 +396,7 @@ export default function AgentsPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => { setShowCreate(false); reset(); setAgentType(agentTypeOptions[0]); }}
+              onClick={() => { setShowCreate(false); reset(); setAgentMode(agentModeOptions[0]); }}
               disabled={createMutation.isPending}
             >
               Cancel

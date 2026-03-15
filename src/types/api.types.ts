@@ -17,6 +17,7 @@ export type UserRole =
   | "org_admin";
 
 export type AgentType = "user" | "device";
+export type AgentAutomationMode = "full_automated" | "sim_automated";
 
 export type AgentAccountStatus = "active" | "inactive" | "suspended";
 
@@ -81,6 +82,8 @@ export interface OrgResource {
   slug: string;
   is_active: boolean;
   callback_url: string | null;
+  ai_registery_project_id?: string | null;
+  ai_registery_project_api_key?: string | null;
   created_at: ISODateString;
   updated_at: ISODateString;
   users_count?: number;
@@ -119,6 +122,8 @@ export interface LoginUser {
     slug: string;
     is_active: boolean;
     callback_url: string | null;
+    ai_registery_project_id?: string | null;
+    ai_registery_project_api_key?: string | null;
   };
 }
 
@@ -267,6 +272,7 @@ export interface PaymentAgentResource {
   id: UUID;
   name: string;
   type: AgentType;
+  automation_mode?: AgentAutomationMode | null;
   login_code: string;
   phone_number: string | null;
   device_name: string | null;
@@ -343,6 +349,7 @@ export interface BankReferencePlaygroundInput {
 export interface StoreAgentInput {
   name: string;
   type: AgentType;
+  automation_mode?: AgentAutomationMode;
   phone_number?: string;
   user_name?: string;
   password?: string;
@@ -394,12 +401,16 @@ export interface UpdateOrgInput {
   slug?: string;
   is_active?: boolean;
   callback_url?: string | null;
+  ai_registery_project_id?: string | null;
+  ai_registery_project_api_key?: string | null;
 }
 
 export interface StoreOrgInput {
   name: string;
   slug?: string;
   callback_url?: string | null;
+  ai_registery_project_id?: string | null;
+  ai_registery_project_api_key?: string | null;
 }
 
 // ── Transaction Module (Phase 2) ──────────────────────────────────────────────

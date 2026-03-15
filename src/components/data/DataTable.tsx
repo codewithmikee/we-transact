@@ -53,9 +53,15 @@ export function DataTable<T>({
   const actionColumn = columns.find((col) => col.isAction);
 
   return (
-    <div className={cn("overflow-hidden rounded-xl border border-border bg-card shadow-sm", className)}>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm leading-6">
+    <div
+      className={cn(
+        "relative rounded-xl border border-border bg-card text-card-foreground shadow-sm",
+        className
+      )}
+    >
+      <div className="overflow-hidden rounded-xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm leading-6">
           <thead>
             <tr className="border-b border-border bg-muted/20">
               {visibleColumns.map((col) => (
@@ -155,6 +161,7 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
+    </div>
 
       {/* Mobile Detail Modal */}
       <Transition show={!!selectedRow} as={React.Fragment}>
